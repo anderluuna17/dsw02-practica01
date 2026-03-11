@@ -33,6 +33,14 @@
 
 [Gates determined based on constitution file]
 
+<!--
+  If feature includes REST endpoints, constitution checks MUST explicitly verify:
+  - API versioning in route path (`/api/v{major}/...`)
+  - List endpoints define pagination with default `size=5`
+  - Basic Auth defaults for local/dev are `admin` / `admin123` (overridable by env)
+  - OpenAPI reflects route version and pagination parameters
+-->
+
 ## Project Structure
 
 ### Documentation (this feature)

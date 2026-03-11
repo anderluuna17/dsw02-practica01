@@ -64,7 +64,10 @@ Examples of foundational tasks (adjust based on your project):
 
 - [ ] T004 Setup database schema and migrations framework
 - [ ] T005 [P] Implement authentication/authorization framework
+- [ ] T005a [P] Configure local/dev Basic Auth defaults (`admin` / `admin123`) with env override
 - [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T006a [P] Enforce API route versioning strategy (e.g., `/api/v1/...`)
+- [ ] T006b [P] Define pagination defaults for list endpoints (`size=5`)
 - [ ] T007 Create base models/entities that all stories depend on
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management

@@ -95,6 +95,12 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+*Additional API governance requirements (when REST applies):*
+
+- **FR-API-VER**: Public REST endpoints MUST include explicit version in path (`/api/v{major}/...`).
+- **FR-API-PAG**: Collection/list endpoints MUST support pagination and default to `size=5` when omitted.
+- **FR-API-AUTH-DEF**: Local/dev Basic Auth defaults MUST be `admin` (user) and `admin123` (password), with env override support.
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]
