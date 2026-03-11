@@ -1,6 +1,7 @@
 package com.dsw02.empleado.api;
 
 import com.dsw02.empleado.api.dto.EmpleadoCreateRequest;
+import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
 import com.dsw02.empleado.api.dto.EmpleadoResponse;
 import com.dsw02.empleado.api.dto.EmpleadoUpdateRequest;
 import com.dsw02.empleado.application.ActualizarEmpleadoService;
@@ -11,7 +12,6 @@ import com.dsw02.empleado.application.ObtenerEmpleadoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,12 +19,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/empleados")
+@RequestMapping("/api/v1/empleados")
 @Tag(name = "Empleados")
 public class EmpleadoController {
 
@@ -63,8 +64,11 @@ public class EmpleadoController {
 
     @GetMapping
     @Operation(summary = "Listar empleados")
-    public List<EmpleadoResponse> listar() {
-        return listarEmpleadosService.listar().stream().map(EmpleadoResponse::fromDomain).toList();
+    public EmpleadoPageResponse listar(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size
+    ) {
+        return listarEmpleadosService.listar(page, size);
     }
 
     @PutMapping("/{clave}")

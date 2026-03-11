@@ -48,7 +48,7 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
             }
             """;
 
-        MvcResult createResult = mockMvc.perform(post("/api/empleados")
+        MvcResult createResult = mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createPayload))
@@ -60,15 +60,16 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
         JsonNode created = objectMapper.readTree(createResult.getResponse().getContentAsString());
         String clave = created.get("clave").asText();
 
-        mockMvc.perform(get("/api/empleados/{clave}", clave)
+        mockMvc.perform(get("/api/v1/empleados/{clave}", clave)
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.clave").value(clave));
 
-        mockMvc.perform(get("/api/empleados")
+        mockMvc.perform(get("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].clave").value(clave));
+            .andExpect(jsonPath("$.content[0].clave").value(clave))
+            .andExpect(jsonPath("$.size").value(5));
 
         String updatePayload = """
             {
@@ -78,24 +79,24 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
             }
             """;
 
-        mockMvc.perform(put("/api/empleados/{clave}", clave)
+        mockMvc.perform(put("/api/v1/empleados/{clave}", clave)
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(updatePayload))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.nombre").value("Juan Actualizado"));
 
-        mockMvc.perform(delete("/api/empleados/{clave}", clave)
+        mockMvc.perform(delete("/api/v1/empleados/{clave}", clave)
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/empleados/{clave}", clave)
+        mockMvc.perform(get("/api/v1/empleados/{clave}", clave)
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNotFound());
     }
 
     @Test
-    void shouldRejectClaveInCreatePayload() throws Exception {
+    void shouldIgnoreClaveInCreatePayload() throws Exception {
         String payload = """
             {
               "clave":"EMP-9999",
@@ -105,11 +106,12 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
             }
             """;
 
-        mockMvc.perform(post("/api/empleados")
+        mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value("CLAVE_NO_EDITABLE"));
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.clave").value(org.hamcrest.Matchers.not("EMP-9999")))
+            .andExpect(jsonPath("$.clave").value(org.hamcrest.Matchers.matchesPattern("EMP-[0-9]+")));
     }
 }

@@ -3,7 +3,6 @@ package com.dsw02.empleado.application;
 import com.dsw02.empleado.api.dto.EmpleadoCreateRequest;
 import com.dsw02.empleado.domain.ClaveParser;
 import com.dsw02.empleado.domain.Empleado;
-import com.dsw02.empleado.domain.exception.ClaveNoEditableException;
 import com.dsw02.empleado.infrastructure.persistence.ConsecutivoRepository;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoEntity;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoId;
@@ -28,9 +27,7 @@ public class CrearEmpleadoService {
     }
 
     public Empleado crear(EmpleadoCreateRequest request) {
-        if (request.getClave() != null && !request.getClave().isBlank()) {
-            throw new ClaveNoEditableException("La clave no puede enviarse en el alta; se genera automáticamente");
-        }
+        // Ignore client-provided clave; authoritative value is always generated server-side.
 
         long consecutivo = consecutivoRepository.siguienteConsecutivo();
         EmpleadoId id = new EmpleadoId(ClaveParser.PREFIJO, consecutivo);

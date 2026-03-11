@@ -1,10 +1,12 @@
 package com.dsw02.empleado.application;
 
+import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
+import com.dsw02.empleado.api.dto.EmpleadoResponse;
 import com.dsw02.empleado.domain.ClaveParser;
-import com.dsw02.empleado.domain.Empleado;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoEntity;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoRepository;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,19 +20,31 @@ public class ListarEmpleadosService {
         this.claveParser = claveParser;
     }
 
-    public List<Empleado> listar() {
-        return empleadoRepository.findAll()
-            .stream()
-            .map(this::toDomain)
-            .toList();
+    public EmpleadoPageResponse listar(int page, int size) {
+        Page<EmpleadoEntity> result = empleadoRepository.findAll(PageRequest.of(page, size));
+        return new EmpleadoPageResponse(
+            result.getContent().stream().map(this::toResponse).toList(),
+            result.getNumber(),
+            result.getSize(),
+            result.getTotalElements(),
+            result.getTotalPages()
+        );
     }
 
-    private Empleado toDomain(EmpleadoEntity entity) {
-        return new Empleado(
+    private EmpleadoResponse toResponse(EmpleadoEntity entity) {
+        return new EmpleadoResponse(
             claveParser.buildClave(entity.getId().getConsecutivo()),
             entity.getNombre(),
             entity.getDireccion(),
             entity.getTelefono()
         );
+    }
+
+    public EmpleadoPageResponse listarConDefaultSize(int page) {
+        return listar(page, 5);
+    }
+
+    public EmpleadoPageResponse listarDefault() {
+        return listar(0, 5);
     }
 }

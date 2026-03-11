@@ -18,7 +18,7 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
 
     @Test
     void shouldRequireAuthenticationOnBusinessEndpoints() throws Exception {
-        mockMvc.perform(get("/api/empleados"))
+        mockMvc.perform(get("/api/v1/empleados"))
             .andExpect(status().isUnauthorized());
     }
 

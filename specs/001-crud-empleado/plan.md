@@ -26,7 +26,7 @@ Implementar un CRUD REST de `Empleado` con validaciones de negocio: `clave` auto
 ### Pre-Phase 0 Gate Review
 
 - **I. Stack Tecnológico Obligatorio**: PASS. Se define Spring Boot 3 + Java 17.
-- **II. Seguridad por Defecto (Basic Auth)**: PASS. API de negocio protegida con HTTP Basic.
+- **II. Seguridad por Defecto (Basic Auth)**: PASS. API de negocio protegida con HTTP Basic y credenciales default local/dev definidas como `admin`/`admin123` con override por variables de entorno.
 - **III. Persistencia en PostgreSQL**: PASS. Modelo y repositorio orientados a PostgreSQL parametrizado por entorno.
 - **IV. Entorno Reproducible con Docker**: PASS. Diseño contempla `Dockerfile` + `docker-compose.yml` (app + postgres).
 - **V. Contrato API Versionado, Paginación y Documentación Viva**: PASS. Se define versionado de rutas (`/api/v1/...`), paginación en listados con `size=5` por defecto y sincronización de contrato OpenAPI.
@@ -37,6 +37,7 @@ Resultado: **Sin violaciones**. Se puede iniciar Phase 0.
 
 - Modelo de datos definido y consistente con PostgreSQL: PASS.
 - Contratos de endpoints CRUD definidos con seguridad y respuestas de error: PASS.
+- Configuración y validación de acceso local con `APP_BASIC_USER=admin` y `APP_BASIC_PASSWORD=admin123`: PASS.
 - Quickstart incluye ejecución local y en contenedor con variables de entorno: PASS.
 
 Resultado: **Sin violaciones** tras diseño.
@@ -85,3 +86,9 @@ docker-compose.yml
 ## Complexity Tracking
 
 No aplica. No hay violaciones de constitución que requieran justificación.
+
+## Release Scope Notes
+
+- Incluye rutas versionadas `/api/v1/empleados` con seguridad HTTP Basic.
+- Incluye listado paginado con `size=5` por defecto cuando el cliente omite el parámetro.
+- En alta, cualquier `clave` enviada por cliente se ignora y se genera una clave oficial `EMP-<autonumérico>`.
