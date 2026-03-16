@@ -44,7 +44,9 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
             {
               "nombre":"Juan Pérez",
               "direccion":"Calle Uno 123",
-              "telefono":"5551234567"
+                            "telefono":"5551234567",
+                            "correo":"juan.perez@empresa.com",
+                            "contrasena":"MiPassword123"
             }
             """;
 
@@ -69,7 +71,14 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content[0].clave").value(clave))
+            .andExpect(jsonPath("$.content[0].correo").doesNotExist())
             .andExpect(jsonPath("$.size").value(5));
+
+        mockMvc.perform(get("/api/v1/empleados/auth/me")
+                .with(httpBasic("juan.perez@empresa.com", "MiPassword123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.correo").value("juan.perez@empresa.com"))
+            .andExpect(jsonPath("$.clave").value(clave));
 
         String updatePayload = """
             {
@@ -102,7 +111,9 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
               "clave":"EMP-9999",
               "nombre":"Ana",
               "direccion":"Centro 1",
-              "telefono":"5550000000"
+                            "telefono":"5550000000",
+                            "correo":"ana@empresa.com",
+                            "contrasena":"MiPassword123"
             }
             """;
 

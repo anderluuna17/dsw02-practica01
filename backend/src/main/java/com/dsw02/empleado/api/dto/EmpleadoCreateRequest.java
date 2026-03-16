@@ -1,6 +1,7 @@
 package com.dsw02.empleado.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 public class EmpleadoCreateRequest {
@@ -19,6 +20,15 @@ public class EmpleadoCreateRequest {
     @Size(max = 100)
     private String telefono;
 
+    @NotBlank
+    @Email
+    @Size(max = 150)
+    private String correo;
+
+    @NotBlank
+    @Size(min = 8, max = 72)
+    private String contrasena;
+
     public String getClave() {
         return clave;
     }
@@ -33,5 +43,13 @@ public class EmpleadoCreateRequest {
 
     public String getTelefono() {
         return telefono;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public String getContrasena() {
+        return contrasena;
     }
 }
