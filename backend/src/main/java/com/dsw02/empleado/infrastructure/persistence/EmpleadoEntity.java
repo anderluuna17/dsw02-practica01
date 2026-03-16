@@ -21,14 +21,34 @@ public class EmpleadoEntity {
     @Column(name = "telefono", nullable = false, length = 100)
     private String telefono;
 
+    @Column(name = "correo", nullable = false, length = 150)
+    private String correo;
+
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
+
+    @Column(name = "activo", nullable = false)
+    private boolean activo;
+
     public EmpleadoEntity() {
     }
 
-    public EmpleadoEntity(EmpleadoId id, String nombre, String direccion, String telefono) {
+    public EmpleadoEntity(
+        EmpleadoId id,
+        String nombre,
+        String direccion,
+        String telefono,
+        String correo,
+        String passwordHash,
+        boolean activo
+    ) {
         this.id = id;
         this.nombre = nombre;
         this.direccion = direccion;
         this.telefono = telefono;
+        this.correo = correo;
+        this.passwordHash = passwordHash;
+        this.activo = activo;
     }
 
     public EmpleadoId getId() {
@@ -57,5 +77,29 @@ public class EmpleadoEntity {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
+    }
+
+    public String getCorreo() {
+        return correo;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 }
