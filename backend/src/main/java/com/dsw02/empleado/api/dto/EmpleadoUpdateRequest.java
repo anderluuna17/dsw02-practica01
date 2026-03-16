@@ -19,6 +19,9 @@ public class EmpleadoUpdateRequest {
     @Size(max = 100)
     private String telefono;
 
+    @Size(min = 8, max = 72)
+    private String contrasena;
+
     public String getClave() {
         return clave;
     }
@@ -33,5 +36,9 @@ public class EmpleadoUpdateRequest {
 
     public String getTelefono() {
         return telefono;
+    }
+
+    public String getContrasena() {
+        return contrasena;
     }
 }

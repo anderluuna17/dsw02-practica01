@@ -19,6 +19,8 @@ public class GlobalExceptionHandler {
         HttpStatus status = switch (exception.getErrorCode()) {
             case NO_ENCONTRADO -> HttpStatus.NOT_FOUND;
             case FORMATO_CLAVE_INVALIDO, CLAVE_NO_EDITABLE, VALIDACION -> HttpStatus.BAD_REQUEST;
+            case AUTH_INVALIDA, CUENTA_INACTIVA -> HttpStatus.UNAUTHORIZED;
+            case NO_AUTORIZADO -> HttpStatus.FORBIDDEN;
         };
 
         ErrorResponse response = new ErrorResponse(
@@ -53,11 +55,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception exception) {
         ErrorResponse response = new ErrorResponse(
-            ErrorCode.VALIDACION.name(),
+            ErrorCode.AUTH_INVALIDA.name(),
             exception.getMessage(),
             List.of()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }

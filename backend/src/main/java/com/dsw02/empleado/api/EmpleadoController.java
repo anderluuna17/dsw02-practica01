@@ -1,6 +1,9 @@
 package com.dsw02.empleado.api;
 
 import com.dsw02.empleado.api.dto.EmpleadoCreateRequest;
+import com.dsw02.empleado.api.dto.EmpleadoAuthProfileResponse;
+import com.dsw02.empleado.api.dto.EmpleadoEstadoRequest;
+import com.dsw02.empleado.api.dto.EmpleadoEstadoResponse;
 import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
 import com.dsw02.empleado.api.dto.EmpleadoResponse;
 import com.dsw02.empleado.api.dto.EmpleadoUpdateRequest;
@@ -9,13 +12,16 @@ import com.dsw02.empleado.application.CrearEmpleadoService;
 import com.dsw02.empleado.application.EliminarEmpleadoService;
 import com.dsw02.empleado.application.ListarEmpleadosService;
 import com.dsw02.empleado.application.ObtenerEmpleadoService;
+import com.dsw02.empleado.application.ObtenerPerfilAutenticadoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.security.Principal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -34,19 +40,22 @@ public class EmpleadoController {
     private final ListarEmpleadosService listarEmpleadosService;
     private final ActualizarEmpleadoService actualizarEmpleadoService;
     private final EliminarEmpleadoService eliminarEmpleadoService;
+    private final ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService;
 
     public EmpleadoController(
         CrearEmpleadoService crearEmpleadoService,
         ObtenerEmpleadoService obtenerEmpleadoService,
         ListarEmpleadosService listarEmpleadosService,
         ActualizarEmpleadoService actualizarEmpleadoService,
-        EliminarEmpleadoService eliminarEmpleadoService
+        EliminarEmpleadoService eliminarEmpleadoService,
+        ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService
     ) {
         this.crearEmpleadoService = crearEmpleadoService;
         this.obtenerEmpleadoService = obtenerEmpleadoService;
         this.listarEmpleadosService = listarEmpleadosService;
         this.actualizarEmpleadoService = actualizarEmpleadoService;
         this.eliminarEmpleadoService = eliminarEmpleadoService;
+        this.obtenerPerfilAutenticadoService = obtenerPerfilAutenticadoService;
     }
 
     @PostMapping
@@ -71,6 +80,14 @@ public class EmpleadoController {
         return listarEmpleadosService.listar(page, size);
     }
 
+    @GetMapping("/auth/me")
+    @Operation(summary = "Obtener perfil autenticado")
+    public EmpleadoAuthProfileResponse perfilAutenticado(Principal principal) {
+        return EmpleadoAuthProfileResponse.fromDomain(
+            obtenerPerfilAutenticadoService.obtenerPorCorreoPrincipal(principal.getName())
+        );
+    }
+
     @PutMapping("/{clave}")
     @Operation(summary = "Actualizar empleado")
     public EmpleadoResponse actualizar(@PathVariable String clave, @Valid @RequestBody EmpleadoUpdateRequest request) {
@@ -82,5 +99,15 @@ public class EmpleadoController {
     public ResponseEntity<Void> eliminar(@PathVariable String clave) {
         eliminarEmpleadoService.eliminar(clave);
         return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{clave}/estado")
+    @Operation(summary = "Actualizar estado de cuenta")
+    public EmpleadoEstadoResponse actualizarEstado(
+        @PathVariable String clave,
+        @Valid @RequestBody EmpleadoEstadoRequest request
+    ) {
+        var empleado = actualizarEmpleadoService.actualizarEstado(clave, request);
+        return new EmpleadoEstadoResponse(empleado.clave(), empleado.activo());
     }
 }

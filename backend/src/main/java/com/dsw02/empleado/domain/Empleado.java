@@ -4,6 +4,8 @@ public record Empleado(
     String clave,
     String nombre,
     String direccion,
-    String telefono
+    String telefono,
+    String correo,
+    boolean activo
 ) {
 }
