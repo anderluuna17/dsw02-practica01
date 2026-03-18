@@ -36,7 +36,8 @@ public class ListarEmpleadosService {
             claveParser.buildClave(entity.getId().getConsecutivo()),
             entity.getNombre(),
             entity.getDireccion(),
-            entity.getTelefono()
+            entity.getTelefono(),
+            entity.getDepartamentoClave()
         );
     }
 

@@ -16,4 +16,8 @@ public interface EmpleadoRepository extends JpaRepository<EmpleadoEntity, Emplea
 
 	@Query("select count(e) > 0 from EmpleadoEntity e where lower(e.correo) = lower(?1)")
 	boolean existsByCorreoIgnoreCase(String correo);
+
+	Page<EmpleadoEntity> findByDepartamentoClave(String departamentoClave, Pageable pageable);
+
+	long countByDepartamentoClave(String departamentoClave);
 }
