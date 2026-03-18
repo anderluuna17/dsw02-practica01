@@ -19,4 +19,12 @@ public class ConsecutivoRepository {
         }
         return next;
     }
+
+    public long siguienteConsecutivoDepartamento() {
+        Long next = jdbcTemplate.queryForObject("SELECT nextval('departamento_consecutivo_seq')", Long.class);
+        if (next == null) {
+            throw new IllegalStateException("No fue posible obtener consecutivo para departamento");
+        }
+        return next;
+    }
 }

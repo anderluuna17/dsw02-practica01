@@ -6,7 +6,8 @@ public record EmpleadoResponse(
     String clave,
     String nombre,
     String direccion,
-    String telefono
+    String telefono,
+    String departamentoClave
 ) {
 
     public static EmpleadoResponse fromDomain(Empleado empleado) {
@@ -14,7 +15,8 @@ public record EmpleadoResponse(
             empleado.clave(),
             empleado.nombre(),
             empleado.direccion(),
-            empleado.telefono()
+            empleado.telefono(),
+            empleado.departamentoClave()
         );
     }
 }

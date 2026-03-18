@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
         HttpStatus status = switch (exception.getErrorCode()) {
             case NO_ENCONTRADO -> HttpStatus.NOT_FOUND;
             case FORMATO_CLAVE_INVALIDO, CLAVE_NO_EDITABLE, VALIDACION -> HttpStatus.BAD_REQUEST;
+            case CONFLICTO -> HttpStatus.CONFLICT;
             case AUTH_INVALIDA, CUENTA_INACTIVA -> HttpStatus.UNAUTHORIZED;
             case NO_AUTORIZADO -> HttpStatus.FORBIDDEN;
         };

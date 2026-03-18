@@ -30,6 +30,9 @@ public class EmpleadoEntity {
     @Column(name = "activo", nullable = false)
     private boolean activo;
 
+    @Column(name = "departamento_clave", nullable = false, length = 8)
+    private String departamentoClave;
+
     public EmpleadoEntity() {
     }
 
@@ -40,7 +43,8 @@ public class EmpleadoEntity {
         String telefono,
         String correo,
         String passwordHash,
-        boolean activo
+        boolean activo,
+        String departamentoClave
     ) {
         this.id = id;
         this.nombre = nombre;
@@ -49,6 +53,7 @@ public class EmpleadoEntity {
         this.correo = correo;
         this.passwordHash = passwordHash;
         this.activo = activo;
+        this.departamentoClave = departamentoClave;
     }
 
     public EmpleadoId getId() {
@@ -101,5 +106,13 @@ public class EmpleadoEntity {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public String getDepartamentoClave() {
+        return departamentoClave;
+    }
+
+    public void setDepartamentoClave(String departamentoClave) {
+        this.departamentoClave = departamentoClave;
     }
 }

@@ -38,6 +38,9 @@ public class CrearEmpleadoService {
 
     public Empleado crear(EmpleadoCreateRequest request) {
         // Ignore client-provided clave; authoritative value is always generated server-side.
+        if (request.getDepartamentoClave() != null && !request.getDepartamentoClave().isBlank()) {
+            throw new BusinessException(ErrorCode.VALIDACION, "departamentoClave no se permite en el alta inicial de empleado");
+        }
 
         long consecutivo = consecutivoRepository.siguienteConsecutivo();
         EmpleadoId id = new EmpleadoId(ClaveParser.PREFIJO, consecutivo);
@@ -54,7 +57,8 @@ public class CrearEmpleadoService {
             request.getTelefono(),
             correoNormalizado,
             passwordEncoder.encode(request.getContrasena()),
-            true
+            true,
+            "DEP-0000"
         );
         EmpleadoEntity saved = empleadoRepository.save(entity);
 
@@ -63,6 +67,7 @@ public class CrearEmpleadoService {
             saved.getNombre(),
             saved.getDireccion(),
             saved.getTelefono(),
+            saved.getDepartamentoClave(),
             saved.getCorreo(),
             saved.isActivo()
         );
