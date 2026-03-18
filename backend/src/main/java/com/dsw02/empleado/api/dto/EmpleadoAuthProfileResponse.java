@@ -8,6 +8,7 @@ public record EmpleadoAuthProfileResponse(
     String nombre,
     String direccion,
     String telefono,
+    String departamentoClave,
     boolean activo
 ) {
 
@@ -18,6 +19,7 @@ public record EmpleadoAuthProfileResponse(
             empleado.nombre(),
             empleado.direccion(),
             empleado.telefono(),
+            empleado.departamentoClave(),
             empleado.activo()
         );
     }

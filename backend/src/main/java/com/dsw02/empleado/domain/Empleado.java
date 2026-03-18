@@ -5,6 +5,7 @@ public record Empleado(
     String nombre,
     String direccion,
     String telefono,
+    String departamentoClave,
     String correo,
     boolean activo
 ) {

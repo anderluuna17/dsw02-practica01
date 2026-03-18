@@ -49,6 +49,7 @@ public class ActualizarEmpleadoService {
             saved.getNombre(),
             saved.getDireccion(),
             saved.getTelefono(),
+            saved.getDepartamentoClave(),
             saved.getCorreo(),
             saved.isActivo()
         );
@@ -69,6 +70,7 @@ public class ActualizarEmpleadoService {
             saved.getNombre(),
             saved.getDireccion(),
             saved.getTelefono(),
+            saved.getDepartamentoClave(),
             saved.getCorreo(),
             saved.isActivo()
         );
