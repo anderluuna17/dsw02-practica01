@@ -29,6 +29,8 @@ public class EmpleadoCreateRequest {
     @Size(min = 8, max = 72)
     private String contrasena;
 
+    private String departamentoClave;
+
     public String getClave() {
         return clave;
     }
@@ -51,5 +53,9 @@ public class EmpleadoCreateRequest {
 
     public String getContrasena() {
         return contrasena;
+    }
+
+    public String getDepartamentoClave() {
+        return departamentoClave;
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -49,6 +48,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                 .requestMatchers(HttpMethod.PATCH, "/api/v1/empleados/*/estado").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/api/v1/empleados/*/departamento").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

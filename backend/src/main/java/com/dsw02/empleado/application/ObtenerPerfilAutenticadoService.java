@@ -35,6 +35,7 @@ public class ObtenerPerfilAutenticadoService {
             entity.getNombre(),
             entity.getDireccion(),
             entity.getTelefono(),
+            entity.getDepartamentoClave(),
             entity.getCorreo(),
             entity.isActivo()
         );

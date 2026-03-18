@@ -4,10 +4,12 @@ import com.dsw02.empleado.api.dto.EmpleadoCreateRequest;
 import com.dsw02.empleado.api.dto.EmpleadoAuthProfileResponse;
 import com.dsw02.empleado.api.dto.EmpleadoEstadoRequest;
 import com.dsw02.empleado.api.dto.EmpleadoEstadoResponse;
+import com.dsw02.empleado.api.dto.EmpleadoDepartamentoRequest;
 import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
 import com.dsw02.empleado.api.dto.EmpleadoResponse;
 import com.dsw02.empleado.api.dto.EmpleadoUpdateRequest;
 import com.dsw02.empleado.application.ActualizarEmpleadoService;
+import com.dsw02.empleado.application.AsignarDepartamentoEmpleadoService;
 import com.dsw02.empleado.application.CrearEmpleadoService;
 import com.dsw02.empleado.application.EliminarEmpleadoService;
 import com.dsw02.empleado.application.ListarEmpleadosService;
@@ -40,6 +42,7 @@ public class EmpleadoController {
     private final ListarEmpleadosService listarEmpleadosService;
     private final ActualizarEmpleadoService actualizarEmpleadoService;
     private final EliminarEmpleadoService eliminarEmpleadoService;
+    private final AsignarDepartamentoEmpleadoService asignarDepartamentoEmpleadoService;
     private final ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService;
 
     public EmpleadoController(
@@ -48,6 +51,7 @@ public class EmpleadoController {
         ListarEmpleadosService listarEmpleadosService,
         ActualizarEmpleadoService actualizarEmpleadoService,
         EliminarEmpleadoService eliminarEmpleadoService,
+        AsignarDepartamentoEmpleadoService asignarDepartamentoEmpleadoService,
         ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService
     ) {
         this.crearEmpleadoService = crearEmpleadoService;
@@ -55,6 +59,7 @@ public class EmpleadoController {
         this.listarEmpleadosService = listarEmpleadosService;
         this.actualizarEmpleadoService = actualizarEmpleadoService;
         this.eliminarEmpleadoService = eliminarEmpleadoService;
+        this.asignarDepartamentoEmpleadoService = asignarDepartamentoEmpleadoService;
         this.obtenerPerfilAutenticadoService = obtenerPerfilAutenticadoService;
     }
 
@@ -109,5 +114,14 @@ public class EmpleadoController {
     ) {
         var empleado = actualizarEmpleadoService.actualizarEstado(clave, request);
         return new EmpleadoEstadoResponse(empleado.clave(), empleado.activo());
+    }
+
+    @PatchMapping("/{clave}/departamento")
+    @Operation(summary = "Asignar o cambiar departamento de empleado")
+    public EmpleadoResponse asignarDepartamento(
+        @PathVariable String clave,
+        @Valid @RequestBody EmpleadoDepartamentoRequest request
+    ) {
+        return EmpleadoResponse.fromDomain(asignarDepartamentoEmpleadoService.asignar(clave, request));
     }
 }
