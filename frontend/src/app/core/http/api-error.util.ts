@@ -17,3 +17,7 @@ export function extractApiErrorMessage(error: unknown, fallback: string): string
 
   return fallback;
 }
+
+export function isUnauthorizedOrForbidden(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403);
+}

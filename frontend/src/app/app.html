@@ -18,7 +18,7 @@
   @if (!isAuthenticated) {
     <section class="card login-card">
       <h2>Iniciar sesion</h2>
-      <p>Usa usuario admin o correo de empleado activo.</p>
+      <p>Solo el usuario admin puede acceder a esta pantalla.</p>
 
       <form [formGroup]="authForm" (ngSubmit)="login()" class="form-grid">
         <label>

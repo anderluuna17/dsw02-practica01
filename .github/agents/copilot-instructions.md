@@ -3,6 +3,12 @@
 Auto-generated from all feature plans. Last updated: 2026-02-26
 
 ## Active Technologies
+- PostgreSQL (002-autenticar-empleados-correo)
+- TypeScript 5.9, SCSS, HTML (Angular 21.2.x en este entorno; Angular 22 no disponible en npm al momento) + Angular standalone APIs, `@angular/common/http`, `@angular/forms`, RxJS (004-login-frontend-admin)
+- N/A para persistencia nueva (sesion solo en memoria de UI) (004-login-frontend-admin)
+- TypeScript 5.9, HTML, SCSS (Angular 21.2.x en este entorno) + Angular standalone APIs, `@angular/common/http`, `@angular/forms`, RxJS (005-crud-empleados-frontend-admin)
+- N/A para persistencia nueva; estado de sesion y formularios en memoria de UI (005-crud-empleados-frontend-admin)
+- N/A para persistencia nueva; sesion y estado de UI en memoria (005-crud-empleados-frontend-admin)
 
 - Java 17 + Spring Boot 3 (Web, Validation, Data JPA, Security), springdoc-openapi (001-crud-empleado)
 
@@ -34,8 +40,10 @@ Java 17: Follow standard conventions
 - Allow credentials override via environment variables.
 
 ## Recent Changes
+- 005-crud-empleados-frontend-admin: Added TypeScript 5.9, HTML, SCSS (Angular 21.2.x en este entorno) + Angular standalone APIs, `@angular/common/http`, `@angular/forms`, RxJS
+- 005-crud-empleados-frontend-admin: Added TypeScript 5.9, HTML, SCSS (Angular 21.2.x en este entorno) + Angular standalone APIs, `@angular/common/http`, `@angular/forms`, RxJS
+- 004-login-frontend-admin: Added TypeScript 5.9, SCSS, HTML (Angular 21.2.x en este entorno; Angular 22 no disponible en npm al momento) + Angular standalone APIs, `@angular/common/http`, `@angular/forms`, RxJS
 
-- 001-crud-empleado: Added Java 17 + Spring Boot 3 (Web, Validation, Data JPA, Security), springdoc-openapi
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
