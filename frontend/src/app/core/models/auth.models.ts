@@ -9,7 +9,9 @@ export interface CredencialesLogin {
   password: string;
 }
 
-export interface PerfilAuth {
+export type ActorType = 'ADMIN' | 'EMPLEADO';
+
+export interface PerfilAuthEmpleadoResumen {
   clave: string;
   correo: string;
   nombre: string;
@@ -17,4 +19,12 @@ export interface PerfilAuth {
   telefono: string;
   departamentoClave: string | null;
   activo: boolean;
+}
+
+export interface PerfilAuth {
+  actorType: ActorType;
+  username: string;
+  displayName: string;
+  permissions: string[];
+  empleado: PerfilAuthEmpleadoResumen | null;
 }

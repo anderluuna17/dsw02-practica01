@@ -38,6 +38,7 @@
   - API versioning in route path (`/api/v{major}/...`)
   - List endpoints define pagination with default `size=5`
   - Basic Auth defaults for local/dev are `admin` / `admin123` (overridable by env)
+  - Auth profile endpoints (e.g. `/auth/me`) distinguish ADMIN vs EMPLEADO actors in contract
   - OpenAPI reflects route version and pagination parameters
 -->
 

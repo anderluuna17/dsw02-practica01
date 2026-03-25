@@ -6,7 +6,9 @@ import com.dsw02.empleado.domain.CorreoNormalizer;
 import com.dsw02.empleado.domain.Empleado;
 import com.dsw02.empleado.domain.ErrorCode;
 import com.dsw02.empleado.domain.exception.BusinessException;
+import com.dsw02.empleado.domain.exception.DepartamentoNotFoundException;
 import com.dsw02.empleado.infrastructure.persistence.ConsecutivoRepository;
+import com.dsw02.empleado.infrastructure.persistence.DepartamentoRepository;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoEntity;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoId;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoRepository;
@@ -21,25 +23,34 @@ public class CrearEmpleadoService {
     private final ClaveParser claveParser;
     private final CorreoNormalizer correoNormalizer;
     private final PasswordEncoder passwordEncoder;
+    private final DepartamentoRepository departamentoRepository;
 
     public CrearEmpleadoService(
         EmpleadoRepository empleadoRepository,
         ConsecutivoRepository consecutivoRepository,
         ClaveParser claveParser,
         CorreoNormalizer correoNormalizer,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        DepartamentoRepository departamentoRepository
     ) {
         this.empleadoRepository = empleadoRepository;
         this.consecutivoRepository = consecutivoRepository;
         this.claveParser = claveParser;
         this.correoNormalizer = correoNormalizer;
         this.passwordEncoder = passwordEncoder;
+        this.departamentoRepository = departamentoRepository;
     }
 
     public Empleado crear(EmpleadoCreateRequest request) {
         // Ignore client-provided clave; authoritative value is always generated server-side.
-        if (request.getDepartamentoClave() != null && !request.getDepartamentoClave().isBlank()) {
-            throw new BusinessException(ErrorCode.VALIDACION, "departamentoClave no se permite en el alta inicial de empleado");
+        String departamentoClave = request.getDepartamentoClave();
+        if (departamentoClave == null || departamentoClave.isBlank()) {
+            departamentoClave = "DEP-0000";
+        } else {
+            departamentoClave = departamentoClave.trim();
+            if (!departamentoRepository.existsByClave(departamentoClave)) {
+                throw new DepartamentoNotFoundException("Departamento no encontrado para clave: " + departamentoClave);
+            }
         }
 
         long consecutivo = consecutivoRepository.siguienteConsecutivo();
@@ -58,7 +69,7 @@ public class CrearEmpleadoService {
             correoNormalizado,
             passwordEncoder.encode(request.getContrasena()),
             true,
-            "DEP-0000"
+            departamentoClave
         );
         EmpleadoEntity saved = empleadoRepository.save(entity);
 

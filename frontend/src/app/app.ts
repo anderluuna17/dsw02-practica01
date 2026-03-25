@@ -5,29 +5,10 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthSessionService } from './core/auth/auth-session.service';
-import { extractApiErrorMessage } from './core/http/api-error.util';
+import { EmpleadosApiService } from './core/http/empleados-api.service';
+import { extractApiErrorMessage, isUnauthorizedOrForbidden } from './core/http/api-error.util';
 import { CredencialesLogin, PerfilAuth } from './core/models/auth.models';
-
-interface ApiPage<T> {
-  content: T[];
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-}
-
-interface Empleado {
-  clave: string;
-  nombre: string;
-  direccion: string;
-  telefono: string;
-  departamentoClave: string | null;
-}
-
-interface Departamento {
-  clave: string;
-  nombre: string;
-}
+import { Departamento, Empleado } from './core/models/empleado.models';
 
 @Component({
   selector: 'app-root',
@@ -38,6 +19,7 @@ interface Departamento {
 export class App {
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly empleadosApi = inject(EmpleadosApiService);
   private readonly authSessionService = inject(AuthSessionService);
   private readonly authCredentialPattern = /^\S+$/;
 
@@ -105,23 +87,28 @@ export class App {
       return;
     }
 
+    const credentials: CredencialesLogin = this.authForm.getRawValue();
+
     this.resetFeedback();
     this.loadingAuth = true;
 
     try {
-      const credentials: CredencialesLogin = this.authForm.getRawValue();
       this.authSessionService.setCredentials(credentials);
 
-      this.perfil = await firstValueFrom(
-        this.http.get<PerfilAuth>('/api/v1/empleados/auth/me', {
-          headers: this.authHeaders(),
-        })
-      );
+      const perfil = await firstValueFrom(this.empleadosApi.authMe(this.authHeaders()));
+      if (perfil.actorType !== 'ADMIN') {
+        this.authSessionService.clear();
+        this.perfil = null;
+        this.errorMessage = 'El usuario autenticado no tiene permisos de administrador.';
+        return;
+      }
+
+      this.perfil = perfil;
 
       this.authSessionService.setProfile(this.perfil);
 
       await Promise.all([this.loadEmpleados(0), this.loadDepartamentos(0)]);
-      this.message = `Sesion iniciada como ${this.perfil.nombre}`;
+      this.message = `Sesion iniciada como ${this.perfil.displayName}`;
     } catch (error) {
       this.perfil = null;
       this.authSessionService.clear();
@@ -152,19 +139,16 @@ export class App {
 
     try {
       const response = await firstValueFrom(
-        this.http.get<ApiPage<Empleado>>('/api/v1/empleados', {
-          headers: this.authHeaders(),
-          params: {
-            page: String(page),
-            size: String(this.empleadosSize),
-          },
-        })
+        this.empleadosApi.listEmpleados(page, this.empleadosSize, this.authHeaders())
       );
 
       this.empleados = response.content;
       this.empleadosPage = response.page;
       this.empleadosTotalPages = response.totalPages;
     } catch (error) {
+      if (this.handleUnauthorized(error)) {
+        return;
+      }
       this.errorMessage = this.formatError(error, 'No fue posible cargar empleados.');
     } finally {
       this.loadingEmpleados = false;
@@ -181,19 +165,16 @@ export class App {
 
     try {
       const response = await firstValueFrom(
-        this.http.get<ApiPage<Departamento>>('/api/v1/departamentos', {
-          headers: this.authHeaders(),
-          params: {
-            page: String(page),
-            size: String(this.departamentosSize),
-          },
-        })
+        this.empleadosApi.listDepartamentos(page, this.departamentosSize, this.authHeaders())
       );
 
       this.departamentos = response.content;
       this.departamentosPage = response.page;
       this.departamentosTotalPages = response.totalPages;
     } catch (error) {
+      if (this.handleUnauthorized(error)) {
+        return;
+      }
       this.errorMessage = this.formatError(error, 'No fue posible cargar departamentos.');
     } finally {
       this.loadingDepartamentos = false;
@@ -271,17 +252,15 @@ export class App {
         };
 
         await firstValueFrom(
-          this.http.put<Empleado>(`/api/v1/empleados/${this.empleadoEditingClave}`, payload, {
-            headers: this.authHeaders(),
-          })
+          this.empleadosApi.updateEmpleado(this.empleadoEditingClave, payload, this.authHeaders())
         );
 
         if (value.departamentoClave.trim()) {
           await firstValueFrom(
-            this.http.patch<Empleado>(
-              `/api/v1/empleados/${this.empleadoEditingClave}/departamento`,
+            this.empleadosApi.assignDepartamento(
+              this.empleadoEditingClave,
               { departamentoClave: value.departamentoClave.trim() },
-              { headers: this.authHeaders() }
+              this.authHeaders()
             )
           );
         }
@@ -297,11 +276,7 @@ export class App {
           departamentoClave: value.departamentoClave.trim() || undefined,
         };
 
-        await firstValueFrom(
-          this.http.post<Empleado>('/api/v1/empleados', payload, {
-            headers: this.authHeaders(),
-          })
-        );
+        await firstValueFrom(this.empleadosApi.createEmpleado(payload, this.authHeaders()));
 
         this.message = 'Empleado creado correctamente.';
       }
@@ -310,6 +285,9 @@ export class App {
       await this.loadEmpleados(this.empleadosPage);
       await this.loadDepartamentos(this.departamentosPage);
     } catch (error) {
+      if (this.handleUnauthorized(error)) {
+        return;
+      }
       this.errorMessage = this.formatError(error, 'No fue posible guardar el empleado.');
     } finally {
       this.savingEmpleado = false;
@@ -321,17 +299,21 @@ export class App {
       return;
     }
 
+    const confirmed = window.confirm(`Deseas eliminar el empleado ${clave}?`);
+    if (!confirmed) {
+      return;
+    }
+
     this.resetFeedback();
 
     try {
-      await firstValueFrom(
-        this.http.delete<void>(`/api/v1/empleados/${clave}`, {
-          headers: this.authHeaders(),
-        })
-      );
+      await firstValueFrom(this.empleadosApi.deleteEmpleado(clave, this.authHeaders()));
       this.message = `Empleado ${clave} eliminado.`;
       await this.loadEmpleados(this.empleadosPage);
     } catch (error) {
+      if (this.handleUnauthorized(error)) {
+        return;
+      }
       this.errorMessage = this.formatError(error, 'No fue posible eliminar el empleado.');
     }
   }
@@ -383,6 +365,9 @@ export class App {
       this.startCreateDepartamento();
       await this.loadDepartamentos(this.departamentosPage);
     } catch (error) {
+      if (this.handleUnauthorized(error)) {
+        return;
+      }
       this.errorMessage = this.formatError(error, 'No fue posible guardar el departamento.');
     } finally {
       this.savingDepartamento = false;
@@ -405,6 +390,9 @@ export class App {
       this.message = `Departamento ${clave} eliminado.`;
       await this.loadDepartamentos(this.departamentosPage);
     } catch (error) {
+      if (this.handleUnauthorized(error)) {
+        return;
+      }
       this.errorMessage = this.formatError(error, 'No fue posible eliminar el departamento.');
     }
   }
@@ -428,5 +416,18 @@ export class App {
 
   private formatError(error: unknown, fallback: string): string {
     return extractApiErrorMessage(error, fallback);
+  }
+
+  private handleUnauthorized(error: unknown): boolean {
+    if (!isUnauthorizedOrForbidden(error)) {
+      return false;
+    }
+
+    this.authSessionService.invalidateFromBackend();
+    this.perfil = null;
+    this.empleados = [];
+    this.departamentos = [];
+    this.errorMessage = 'Sesion invalidada por el backend. Inicia sesion nuevamente.';
+    return true;
   }
 }

@@ -100,6 +100,7 @@
 - **FR-API-VER**: Public REST endpoints MUST include explicit version in path (`/api/v{major}/...`).
 - **FR-API-PAG**: Collection/list endpoints MUST support pagination and default to `size=5` when omitted.
 - **FR-API-AUTH-DEF**: Local/dev Basic Auth defaults MUST be `admin` (user) and `admin123` (password), with env override support.
+- **FR-API-AUTH-PROFILE**: Auth profile endpoints (e.g., `/auth/me`) MUST declare actor type (ADMIN/EMPLEADO or equivalent) and MUST NOT represent admin as empleado.
 
 ### Key Entities *(include if feature involves data)*
 
