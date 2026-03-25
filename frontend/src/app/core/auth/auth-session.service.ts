@@ -23,6 +23,10 @@ export class AuthSessionService {
     return this.profile;
   }
 
+  isAuthenticated(): boolean {
+    return this.credentials !== null && this.profile !== null;
+  }
+
   getAuthHeaders(): HttpHeaders {
     if (!this.credentials) {
       return new HttpHeaders();
@@ -34,5 +38,9 @@ export class AuthSessionService {
   clear(): void {
     this.credentials = null;
     this.profile = null;
+  }
+
+  invalidateFromBackend(): void {
+    this.clear();
   }
 }

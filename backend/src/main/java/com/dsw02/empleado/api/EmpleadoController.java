@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.security.Principal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,6 +45,7 @@ public class EmpleadoController {
     private final EliminarEmpleadoService eliminarEmpleadoService;
     private final AsignarDepartamentoEmpleadoService asignarDepartamentoEmpleadoService;
     private final ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService;
+    private final String adminBasicUser;
 
     public EmpleadoController(
         CrearEmpleadoService crearEmpleadoService,
@@ -52,7 +54,8 @@ public class EmpleadoController {
         ActualizarEmpleadoService actualizarEmpleadoService,
         EliminarEmpleadoService eliminarEmpleadoService,
         AsignarDepartamentoEmpleadoService asignarDepartamentoEmpleadoService,
-        ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService
+        ObtenerPerfilAutenticadoService obtenerPerfilAutenticadoService,
+        @Value("${APP_BASIC_USER:admin}") String adminBasicUser
     ) {
         this.crearEmpleadoService = crearEmpleadoService;
         this.obtenerEmpleadoService = obtenerEmpleadoService;
@@ -61,6 +64,7 @@ public class EmpleadoController {
         this.eliminarEmpleadoService = eliminarEmpleadoService;
         this.asignarDepartamentoEmpleadoService = asignarDepartamentoEmpleadoService;
         this.obtenerPerfilAutenticadoService = obtenerPerfilAutenticadoService;
+        this.adminBasicUser = adminBasicUser;
     }
 
     @PostMapping
@@ -88,9 +92,11 @@ public class EmpleadoController {
     @GetMapping("/auth/me")
     @Operation(summary = "Obtener perfil autenticado")
     public EmpleadoAuthProfileResponse perfilAutenticado(Principal principal) {
-        return EmpleadoAuthProfileResponse.fromDomain(
-            obtenerPerfilAutenticadoService.obtenerPorCorreoPrincipal(principal.getName())
-        );
+        if (adminBasicUser.equals(principal.getName())) {
+            return EmpleadoAuthProfileResponse.admin(principal.getName());
+        }
+
+        return EmpleadoAuthProfileResponse.empleado(obtenerPerfilAutenticadoService.obtenerPorCorreoPrincipal(principal.getName()));
     }
 
     @PutMapping("/{clave}")

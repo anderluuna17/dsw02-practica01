@@ -18,7 +18,7 @@
   @if (!isAuthenticated) {
     <section class="card login-card">
       <h2>Iniciar sesion</h2>
-      <p>Usa usuario admin o correo de empleado activo.</p>
+      <p>Solo el usuario admin puede acceder a esta pantalla.</p>
 
       <form [formGroup]="authForm" (ngSubmit)="login()" class="form-grid">
         <label>
@@ -61,14 +61,9 @@
   } @else {
     <section class="toolbar card">
       <div>
-        <h2>{{ perfil?.nombre }}</h2>
+        <h2>{{ perfil?.displayName }}</h2>
         <p>
-          {{ perfil?.correo }} -
-          @if (perfil?.activo) {
-            Activo
-          } @else {
-            Inactivo
-          }
+          {{ perfil?.username }} - {{ perfil?.actorType }}
         </p>
       </div>
 
