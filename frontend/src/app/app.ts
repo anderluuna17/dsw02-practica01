@@ -22,7 +22,6 @@ export class App {
   private readonly empleadosApi = inject(EmpleadosApiService);
   private readonly authSessionService = inject(AuthSessionService);
   private readonly authCredentialPattern = /^\S+$/;
-  private readonly adminUsername = 'admin';
 
   protected readonly authForm = this.fb.nonNullable.group({
     username: ['admin', [Validators.required, Validators.pattern(this.authCredentialPattern)]],
@@ -89,12 +88,6 @@ export class App {
     }
 
     const credentials: CredencialesLogin = this.authForm.getRawValue();
-    if (credentials.username !== this.adminUsername) {
-      this.authSessionService.clear();
-      this.perfil = null;
-      this.errorMessage = 'Solo el usuario admin puede acceder a esta pantalla.';
-      return;
-    }
 
     this.resetFeedback();
     this.loadingAuth = true;
@@ -102,12 +95,20 @@ export class App {
     try {
       this.authSessionService.setCredentials(credentials);
 
-      this.perfil = await firstValueFrom(this.empleadosApi.authMe(this.authHeaders()));
+      const perfil = await firstValueFrom(this.empleadosApi.authMe(this.authHeaders()));
+      if (perfil.actorType !== 'ADMIN') {
+        this.authSessionService.clear();
+        this.perfil = null;
+        this.errorMessage = 'El usuario autenticado no tiene permisos de administrador.';
+        return;
+      }
+
+      this.perfil = perfil;
 
       this.authSessionService.setProfile(this.perfil);
 
       await Promise.all([this.loadEmpleados(0), this.loadDepartamentos(0)]);
-      this.message = `Sesion iniciada como ${this.perfil.nombre}`;
+      this.message = `Sesion iniciada como ${this.perfil.displayName}`;
     } catch (error) {
       this.perfil = null;
       this.authSessionService.clear();

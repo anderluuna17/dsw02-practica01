@@ -58,15 +58,15 @@ describe('App', () => {
     expect(app.authForm.controls.password.invalid).toBe(true);
   });
 
-  it('should block login when username is not admin', async () => {
+  it('should keep login validation constraints for username with spaces', async () => {
     const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance as any;
 
-    app.authForm.setValue({ username: 'empleado', password: 'empleado123' });
+    app.authForm.setValue({ username: 'empleado demo', password: 'empleado123' });
 
     await app.login();
 
-    expect(app.errorMessage).toContain('Solo el usuario admin');
+    expect(app.errorMessage).toContain('no deben contener espacios');
     expect(app.isAuthenticated).toBe(false);
   });
 });
