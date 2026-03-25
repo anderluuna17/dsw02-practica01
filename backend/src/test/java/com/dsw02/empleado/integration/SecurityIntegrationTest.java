@@ -3,6 +3,7 @@ package com.dsw02.empleado.integration;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.springframework.http.MediaType;
@@ -23,7 +24,8 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
     @Test
     void shouldRequireAuthenticationOnBusinessEndpoints() throws Exception {
         mockMvc.perform(get("/api/v1/empleados"))
-            .andExpect(status().isUnauthorized());
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("AUTH_INVALIDA"));
     }
 
     @Test
@@ -63,6 +65,27 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
                 .with(httpBasic("demo@empresa.com", "MiPassword123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(patchPayload))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
+
+        mockMvc.perform(get("/api/v1/empleados")
+                .with(httpBasic("demo@empresa.com", "MiPassword123")))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
+    }
+
+    @Test
+    void shouldNotExposeUnversionedListEndpoints() throws Exception {
+        mockMvc.perform(get("/empleados")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/departamentos")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isNotFound());
+
+        mockMvc.perform(get("/departamentos/DEP-0000/empleados")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isNotFound());
     }
 }

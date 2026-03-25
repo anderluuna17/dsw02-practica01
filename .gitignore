@@ -8,6 +8,15 @@ backend/.gradle/
 # Logs
 *.log
 
+# Node / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Generic build dirs
+dist/
+build/
+
 # Environment and secrets
 .env
 .env.*

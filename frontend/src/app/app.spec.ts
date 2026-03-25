@@ -57,4 +57,16 @@ describe('App', () => {
     expect(app.errorMessage).toContain('no deben contener espacios');
     expect(app.authForm.controls.password.invalid).toBe(true);
   });
+
+  it('should keep login validation constraints for username with spaces', async () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance as any;
+
+    app.authForm.setValue({ username: 'empleado demo', password: 'empleado123' });
+
+    await app.login();
+
+    expect(app.errorMessage).toContain('no deben contener espacios');
+    expect(app.isAuthenticated).toBe(false);
+  });
 });

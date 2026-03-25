@@ -77,8 +77,17 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
         mockMvc.perform(get("/api/v1/empleados/auth/me")
                 .with(httpBasic("juan.perez@empresa.com", "MiPassword123")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.correo").value("juan.perez@empresa.com"))
-            .andExpect(jsonPath("$.clave").value(clave));
+            .andExpect(jsonPath("$.actorType").value("EMPLEADO"))
+            .andExpect(jsonPath("$.username").value("juan.perez@empresa.com"))
+            .andExpect(jsonPath("$.empleado.correo").value("juan.perez@empresa.com"))
+            .andExpect(jsonPath("$.empleado.clave").value(clave));
+
+        mockMvc.perform(get("/api/v1/empleados/auth/me")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.actorType").value("ADMIN"))
+            .andExpect(jsonPath("$.username").value("admin"))
+            .andExpect(jsonPath("$.empleado").doesNotExist());
 
         String updatePayload = """
             {
@@ -124,5 +133,84 @@ class EmpleadoCrudIntegrationTest extends PostgresIntegrationBase {
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.clave").value(org.hamcrest.Matchers.not("EMP-9999")))
             .andExpect(jsonPath("$.clave").value(org.hamcrest.Matchers.matchesPattern("EMP-[0-9]+")));
+    }
+
+    @Test
+    void shouldCreateEmpleadoWithDepartamentoOnInitialCreate() throws Exception {
+        MvcResult createDepResult = mockMvc.perform(post("/api/v1/departamentos")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombre\":\"Ventas\"}"))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        JsonNode departamento = objectMapper.readTree(createDepResult.getResponse().getContentAsString());
+        String departamentoClave = departamento.get("clave").asText();
+
+        String payload = """
+            {
+              "nombre":"Empleado Con Departamento",
+              "direccion":"Oficina 55",
+              "telefono":"5557779999",
+              "correo":"empleado.depto@empresa.com",
+              "contrasena":"MiPassword123",
+              "departamentoClave":"%s"
+            }
+            """.formatted(departamentoClave);
+
+        mockMvc.perform(post("/api/v1/empleados")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.departamentoClave").value(departamentoClave));
+    }
+
+    @Test
+    void shouldUseDefaultPaginationSizeFiveOnAllVersionedListEndpoints() throws Exception {
+        MvcResult createDepResult = mockMvc.perform(post("/api/v1/departamentos")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"nombre\":\"Soporte\"}"))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        JsonNode departamento = objectMapper.readTree(createDepResult.getResponse().getContentAsString());
+        String departamentoClave = departamento.get("clave").asText();
+
+        String payload = """
+            {
+              "nombre":"Empleado Paginado",
+              "direccion":"Edificio A",
+              "telefono":"5552223333",
+              "correo":"empleado.paginado@empresa.com",
+              "contrasena":"MiPassword123",
+              "departamentoClave":"%s"
+            }
+            """.formatted(departamentoClave);
+
+        mockMvc.perform(post("/api/v1/empleados")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/empleados")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.size").value(5));
+
+        mockMvc.perform(get("/api/v1/departamentos")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.size").value(5));
+
+        mockMvc.perform(get("/api/v1/departamentos/{clave}/empleados", departamentoClave)
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page").value(0))
+            .andExpect(jsonPath("$.size").value(5));
     }
 }
