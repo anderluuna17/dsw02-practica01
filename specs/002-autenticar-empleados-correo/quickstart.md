@@ -74,6 +74,21 @@ curl -u "empleado@empresa.com:MiPassword123" \
 
 Esperado: `200 OK` con perfil del empleado autenticado.
 
+Nota: si no existe un empleado de prueba, crearlo primero con actor admin:
+
+```bash
+curl -i -u "$APP_BASIC_USER:$APP_BASIC_PASSWORD" \
+  -H "Content-Type: application/json" \
+  -X POST http://localhost:8080/api/v1/empleados \
+  -d '{
+    "nombre":"Empleado Demo",
+    "direccion":"Calle Demo 1",
+    "telefono":"5551231234",
+    "correo":"empleado@empresa.com",
+    "contrasena":"MiPassword123"
+  }'
+```
+
 ### 4) Probar credenciales invalidas
 
 ```bash
@@ -86,7 +101,7 @@ Esperado: rechazo de autenticacion con respuesta generica.
 ### 5) Verificar endpoints existentes con paginacion default
 
 ```bash
-curl -u "empleado@empresa.com:MiPassword123" \
+curl -u "$APP_BASIC_USER:$APP_BASIC_PASSWORD" \
   "http://localhost:8080/api/v1/empleados?page=0"
 ```
 
@@ -95,7 +110,7 @@ Esperado: listado paginado con `size=5` por defecto cuando se omite.
 ### 6) Verificar que correo no se expone en response general de empleado
 
 ```bash
-curl -u "empleado@empresa.com:MiPassword123" \
+curl -u "$APP_BASIC_USER:$APP_BASIC_PASSWORD" \
   "http://localhost:8080/api/v1/empleados?page=0&size=5"
 ```
 
@@ -148,6 +163,58 @@ Ejecutar prueba de carga baja/moderada (hasta 50 rps) sobre:
 - endpoint de autenticacion equivalente en flujo Basic Auth
 
 Esperado: p95 <= 200 ms en ambiente de integracion.
+
+## Evidencia de validacion (2026-03-26)
+
+- Health backend: `GET /actuator/health` -> `200`
+- Ruta protegida sin credenciales: `GET /api/v1/empleados/auth/me` -> `401`
+- Smoke oficial: `bash scripts/smoke/empleados-smoke.sh` -> `Smoke OK for clave EMP-1022`
+- Empleado de prueba creado: `perf.1774517965@empresa.com` (`EMP-1023`)
+- Perfil autenticado con empleado valido: `GET /api/v1/empleados/auth/me` -> `200`
+- Perfil autenticado con password invalida: `GET /api/v1/empleados/auth/me` -> `401`
+- Listado con paginacion por defecto: `GET /api/v1/empleados?page=0` (admin) -> `200`, `size=5`
+- Visibilidad de correo en listado general: ocurrencias de campo `correo` en `GET /api/v1/empleados?page=0&size=5` -> `0`
+
+### Evidencia SC-001 (p95 <= 200 ms)
+
+Comando ejecutado:
+
+```bash
+AUTH=$(printf 'perf.1774517965@empresa.com:PerfPass123' | base64)
+npx --yes autocannon -H "Authorization: Basic $AUTH" -m GET -R 50 -d 20 \
+  http://localhost:8080/api/v1/empleados/auth/me
+```
+
+Resultado relevante:
+
+- Latency p97.5 = `155 ms`
+- Latency p99 = `173 ms`
+
+Conclusión: se cumple `p95 <= 200 ms` (si p97.5=155 ms, entonces p95 <= 155 ms).
+
+### Evidencia SC-004/T042 (>= 90% primer intento)
+
+Comando ejecutado:
+
+```bash
+EMAIL='perf.1774517965@empresa.com'
+PASS='PerfPass123'
+TOTAL=50
+OK=0
+for i in $(seq 1 $TOTAL); do
+  CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "$EMAIL:$PASS" \
+    http://localhost:8080/api/v1/empleados/auth/me)
+  if [[ "$CODE" == "200" ]]; then OK=$((OK+1)); fi
+done
+awk "BEGIN { printf \"FIRST_ATTEMPT_OK=%d/%d\\nFIRST_ATTEMPT_RATE=%.2f\\n\", $OK, $TOTAL, ($OK/$TOTAL)*100 }"
+```
+
+Resultado:
+
+- `FIRST_ATTEMPT_OK=50/50`
+- `FIRST_ATTEMPT_RATE=100.00`
+
+Conclusión: cumple umbral `>= 90%`.
 
 ## Pruebas automatizadas
 
