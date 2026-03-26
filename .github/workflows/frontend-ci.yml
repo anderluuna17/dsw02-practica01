@@ -1,0 +1,44 @@
+name: frontend-ci
+
+on:
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  smoke-real:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Start backend stack
+        run: docker compose up -d
+      - name: Install frontend deps
+        run: npm --prefix frontend ci
+      - name: Start frontend
+        run: npm --prefix frontend run start &
+      - name: Wait frontend
+        run: |
+          for i in {1..30}; do
+            curl -fsS http://localhost:4200 && break
+            sleep 2
+          done
+      - name: Smoke real login+navegacion
+        run: npm --prefix frontend run e2e -- --spec cypress/e2e/admin-mvp.cy.ts --browser electron --headless --config baseUrl=http://localhost:4200
+      - name: Smoke real crear+listar empleados
+        run: npm --prefix frontend run e2e -- --spec cypress/e2e/empleados-create-list-smoke.cy.ts --browser electron --headless --config baseUrl=http://localhost:4200
+      - name: Smoke real login empleado
+        run: npm --prefix frontend run e2e -- --spec cypress/e2e/empleado-login-smoke.cy.ts --browser electron --headless --config baseUrl=http://localhost:4200
+
+  regression-stub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install frontend deps
+        run: npm --prefix frontend ci
+      - name: Run frontend regression suite
+        run: npm --prefix frontend run e2e -- --browser electron --headless

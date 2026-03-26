@@ -2,7 +2,9 @@ package com.dsw02.empleado.infrastructure.security;
 
 import com.dsw02.empleado.application.RegistrarEventoAutenticacionService;
 import com.dsw02.empleado.domain.CorreoNormalizer;
+import com.dsw02.empleado.infrastructure.persistence.EmpleadoRepository;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
 import org.springframework.stereotype.Component;
@@ -14,13 +16,16 @@ public class AuthenticationAuditListener {
 
     private final RegistrarEventoAutenticacionService registrarEventoAutenticacionService;
     private final CorreoNormalizer correoNormalizer;
+    private final EmpleadoRepository empleadoRepository;
 
     public AuthenticationAuditListener(
         RegistrarEventoAutenticacionService registrarEventoAutenticacionService,
-        CorreoNormalizer correoNormalizer
+        CorreoNormalizer correoNormalizer,
+        EmpleadoRepository empleadoRepository
     ) {
         this.registrarEventoAutenticacionService = registrarEventoAutenticacionService;
         this.correoNormalizer = correoNormalizer;
+        this.empleadoRepository = empleadoRepository;
     }
 
     @EventListener
@@ -40,10 +45,22 @@ public class AuthenticationAuditListener {
             correo = correoNormalizer.normalize(event.getAuthentication().getName());
         }
 
+        String motivo = "CREDENCIALES_INVALIDAS";
+        if (event.getException() instanceof DisabledException) {
+            motivo = "CUENTA_INACTIVA";
+        } else if (correo != null) {
+            boolean cuentaInactiva = empleadoRepository.findByCorreoIgnoreCase(correo)
+                .map(entity -> !entity.isActivo())
+                .orElse(false);
+            if (cuentaInactiva) {
+                motivo = "CUENTA_INACTIVA";
+            }
+        }
+
         registrarEventoAutenticacionService.registrar(
             correo,
             "FALLO",
-            "CREDENCIALES_INVALIDAS",
+            motivo,
             origenSolicitud()
         );
     }

@@ -113,9 +113,9 @@
 - [X] T037 [P] Sincronizar plan y decisiones finales en specs/002-autenticar-empleados-correo/plan.md y specs/002-autenticar-empleados-correo/research.md
 - [X] T038 [P] Alinear modelo de datos y contrato final en specs/002-autenticar-empleados-correo/data-model.md y specs/002-autenticar-empleados-correo/contracts/empleados-auth-openapi.yaml
 - [X] T039 [P] Actualizar smoke test de autenticacion de empleados en scripts/smoke/empleados-smoke.sh
-- [ ] T040 Ejecutar validacion completa de quickstart y registrar evidencia en specs/002-autenticar-empleados-correo/quickstart.md
-- [ ] T041 [P] Ejecutar prueba de rendimiento de autenticacion y `GET /api/v1/empleados/auth/me` (hasta 50 rps) y registrar evidencia de p95 <= 200 ms en specs/002-autenticar-empleados-correo/quickstart.md
-- [ ] T042 [P] Definir y ejecutar validacion de primer intento exitoso sobre accion protegida, con evidencia de cumplimiento >= 90% en specs/002-autenticar-empleados-correo/quickstart.md
+- [X] T040 Ejecutar validacion completa de quickstart y registrar evidencia en specs/002-autenticar-empleados-correo/quickstart.md
+- [X] T041 [P] Ejecutar prueba de rendimiento de autenticacion y `GET /api/v1/empleados/auth/me` (hasta 50 rps) y registrar evidencia de p95 <= 200 ms en specs/002-autenticar-empleados-correo/quickstart.md
+- [X] T042 [P] Definir y ejecutar validacion de primer intento exitoso sobre accion protegida, con evidencia de cumplimiento >= 90% en specs/002-autenticar-empleados-correo/quickstart.md
 - [X] T043 [P] Validar matriz de respuestas de `PATCH /api/v1/empleados/{clave}/estado` (`401` no autenticado, `403` no autorizado, `404` no encontrado, `200` idempotente) y reflejar ejemplos en specs/002-autenticar-empleados-correo/contracts/empleados-auth-openapi.yaml y specs/002-autenticar-empleados-correo/quickstart.md
 
 ---

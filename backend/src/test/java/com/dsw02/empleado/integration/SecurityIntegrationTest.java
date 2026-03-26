@@ -88,4 +88,111 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
                 .with(httpBasic("admin", "admin123")))
             .andExpect(status().isNotFound());
     }
+
+    @Test
+    void shouldReturnEmpleadoProfileForActiveEmpleadoCredentials() throws Exception {
+        String createPayload = """
+            {
+              "nombre":"Empleado Auth",
+              "direccion":"Calle Auth 123",
+              "telefono":"5553334444",
+              "correo":"empleado.auth@empresa.com",
+              "contrasena":"MiPassword123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/empleados")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createPayload))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/empleados/auth/me")
+                .with(httpBasic("empleado.auth@empresa.com", "MiPassword123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.actorType").value("EMPLEADO"))
+            .andExpect(jsonPath("$.username").value("empleado.auth@empresa.com"))
+            .andExpect(jsonPath("$.permissions[0]").value("SELF"));
+    }
+
+    @Test
+    void shouldReturnAdminActorProfileForAdminCredentials() throws Exception {
+        mockMvc.perform(get("/api/v1/empleados/auth/me")
+                .with(httpBasic("admin", "admin123")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.actorType").value("ADMIN"))
+            .andExpect(jsonPath("$.username").value("admin"))
+            .andExpect(jsonPath("$.empleado").isEmpty())
+            .andExpect(jsonPath("$.permissions[0]").value("CRUD_EMPLEADOS"));
+    }
+
+    @Test
+    void shouldDenyAdminListingsForEmpleadoActor() throws Exception {
+        String createPayload = """
+            {
+              "nombre":"Empleado Denegado",
+              "direccion":"Calle Denegada 123",
+              "telefono":"5559990000",
+              "correo":"empleado.denegado@empresa.com",
+              "contrasena":"MiPassword123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/empleados")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createPayload))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/empleados")
+                .with(httpBasic("empleado.denegado@empresa.com", "MiPassword123")))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
+
+        mockMvc.perform(get("/api/v1/departamentos")
+                .with(httpBasic("empleado.denegado@empresa.com", "MiPassword123")))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
+    }
+
+    @Test
+    void shouldReturnGeneric401ForInvalidPasswordAndInactiveAccount() throws Exception {
+        String createPayload = """
+            {
+              "nombre":"Empleado Auth Error",
+              "direccion":"Calle Error 123",
+              "telefono":"5551010101",
+              "correo":"empleado.error@empresa.com",
+              "contrasena":"MiPassword123"
+            }
+            """;
+
+        mockMvc.perform(post("/api/v1/empleados")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(createPayload))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/empleados/auth/me")
+                .with(httpBasic("empleado.error@empresa.com", "PasswordIncorrecta")))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("AUTH_INVALIDA"))
+            .andExpect(jsonPath("$.message").value("Credenciales invalidas"));
+
+        mockMvc.perform(patch("/api/v1/empleados/EMP-1001/estado")
+                .with(httpBasic("admin", "admin123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "activo": false
+                    }
+                    """))
+            .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/empleados/auth/me")
+                .with(httpBasic("empleado.error@empresa.com", "MiPassword123")))
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("AUTH_INVALIDA"))
+            .andExpect(jsonPath("$.message").value("Credenciales invalidas"));
+    }
 }
