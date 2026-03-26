@@ -3,10 +3,8 @@
     <div>
       <p class="kicker">DSW02 - Frontend Administrativo</p>
       <h1>Panel de Empleados y Departamentos</h1>
-      <p class="subtitle">Cliente Angular conectado a la API protegida con Basic Auth.</p>
+      
       <div class="hero-meta">
-        <span class="chip">Seguridad empresarial</span>
-        <span class="chip">Administracion en tiempo real</span>
       </div>
     </div>
   </header>
@@ -21,17 +19,17 @@
 
   @if (!isAuthenticated) {
     <section class="card login-card" data-cy="login-card">
-      <h2>Iniciar sesion</h2>
+      <h2>Iniciar sesión</h2>
       <p>Solo el usuario admin puede acceder a esta pantalla.</p>
 
       <form [formGroup]="authForm" (ngSubmit)="login()" class="form-grid" data-cy="login-form">
         <label>
-          Usuario o correo
+          Usuario
           <input
             type="text"
             formControlName="username"
-            placeholder="admin"
             data-cy="login-username"
+            autocomplete="username"
             (keydown.space)="$event.preventDefault()"
           />
           @if (authForm.controls.username.touched && authForm.controls.username.hasError('required')) {
@@ -43,12 +41,12 @@
         </label>
 
         <label>
-          Contrasena
+          Contraseña
           <input
             type="password"
             formControlName="password"
-            placeholder="admin123"
             data-cy="login-password"
+            autocomplete="current-password"
             (keydown.space)="$event.preventDefault()"
           />
           @if (authForm.controls.password.touched && authForm.controls.password.hasError('required')) {
@@ -63,6 +61,13 @@
           @if (loadingAuth) { Validando... } @else { Entrar }
         </button>
       </form>
+
+      <div class="login-secondary-actions" data-cy="login-secondary-actions">
+        <p>Tambien puedes acceder con tu cuenta de empleado.</p>
+        <a routerLink="/empleado/login" class="employee-access-link" data-cy="go-empleado-login">
+          Ir a login de empleado
+        </a>
+      </div>
     </section>
   } @else {
     <section class="toolbar card" data-cy="admin-toolbar">
@@ -76,7 +81,7 @@
       <div class="toolbar-actions" data-cy="toolbar-actions">
         <button
           type="button"
-          (click)="view = 'empleados'"
+          (click)="switchToEmpleados()"
           [class.active]="view === 'empleados'"
           data-cy="nav-empleados"
         >
@@ -84,7 +89,7 @@
         </button>
         <button
           type="button"
-          (click)="view = 'departamentos'"
+          (click)="switchToDepartamentos()"
           [class.active]="view === 'departamentos'"
           data-cy="nav-departamentos"
         >
@@ -108,6 +113,9 @@
           <label>
             Nombre
             <input type="text" formControlName="nombre" />
+            @if (empleadoForm.controls.nombre.touched && empleadoForm.controls.nombre.hasError('pattern')) {
+              <small class="field-error">El nombre solo admite letras y espacios.</small>
+            }
           </label>
 
           <label>
@@ -118,6 +126,9 @@
           <label>
             Telefono
             <input type="text" formControlName="telefono" />
+            @if (empleadoForm.controls.telefono.touched && empleadoForm.controls.telefono.hasError('pattern')) {
+              <small class="field-error">El telefono solo admite numeros.</small>
+            }
           </label>
 
           <label>
@@ -153,9 +164,13 @@
             >
               @if (savingEmpleado) { Guardando... } @else if (isEditingEmpleado) { Actualizar } @else { Crear }
             </button>
-            @if (isEditingEmpleado) {
-              <button type="button" class="ghost" (click)="cancelEmpleadoEdition()">Cancelar</button>
-            }
+            <button
+              type="button"
+              class="ghost cancel-action"
+              (click)="isEditingEmpleado ? cancelEmpleadoEdition() : startCreateEmpleado()"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </article>
@@ -238,9 +253,13 @@
             >
               @if (savingDepartamento) { Guardando... } @else if (isEditingDepartamento) { Actualizar } @else { Crear }
             </button>
-            @if (isEditingDepartamento) {
-              <button type="button" class="ghost" (click)="cancelDepartamentoEdition()">Cancelar</button>
-            }
+            <button
+              type="button"
+              class="ghost cancel-action"
+              (click)="isEditingDepartamento ? cancelDepartamentoEdition() : startCreateDepartamento()"
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </article>

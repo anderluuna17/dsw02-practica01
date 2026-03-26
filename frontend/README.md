@@ -54,6 +54,12 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Local authentication conventions
+
+- Admin access in local/dev uses `admin` / `admin123` by default (if backend env keeps defaults).
+- Empleado access must authenticate with empleado email and password.
+- Any authentication contract change must be reflected in OpenAPI and in smoke/regression tests.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

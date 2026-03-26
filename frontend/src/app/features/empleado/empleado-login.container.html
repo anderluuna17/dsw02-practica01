@@ -1,0 +1,79 @@
+<main class="shell empleado-login-page" data-cy="empleado-login-page">
+  <header class="hero">
+    <div>
+      <p class="kicker">DSW02 - Portal de Empleados</p>
+      <h1>Acceso Empleado</h1>
+      <p class="subtitle">Inicia sesión con tu correo corporativo y contraseña.</p>
+      <div class="hero-meta">
+        <span class="chip">Acceso personal</span>
+        <span class="chip">Sesion protegida</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="card login-card" data-cy="empleado-login-card">
+    <h2>Iniciar sesión</h2>
+    <p>Usa tus credenciales de empleado para continuar.</p>
+
+    @if (state.viewState === 'authenticated') {
+      <div class="feedback success" data-cy="empleado-login-success">
+        <strong>Sesion iniciada</strong>
+        <span>{{ state.profile?.displayName }} ({{ state.profile?.username }})</span>
+      </div>
+
+      <button type="button" (click)="logout()" data-cy="empleado-logout">
+        Cerrar sesion
+      </button>
+    } @else {
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="form-grid" data-cy="empleado-login-form">
+        <label>
+          Correo
+          <input
+            type="email"
+            formControlName="correo"
+            placeholder="empleado@empresa.com"
+            data-cy="empleado-correo"
+            autocomplete="username"
+          />
+          @if (loginForm.controls.correo.touched && loginForm.controls.correo.hasError('required')) {
+            <small class="field-error">El correo es obligatorio.</small>
+          }
+          @if (loginForm.controls.correo.touched && loginForm.controls.correo.hasError('email')) {
+            <small class="field-error">Ingresa un correo valido.</small>
+          }
+        </label>
+
+        <label>
+          Contrasena
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="********"
+            data-cy="empleado-password"
+            autocomplete="current-password"
+            (keydown.space)="$event.preventDefault()"
+          />
+          @if (loginForm.controls.password.touched && loginForm.controls.password.hasError('required')) {
+            <small class="field-error">La contrasena es obligatoria.</small>
+          }
+          @if (loginForm.controls.password.touched && loginForm.controls.password.hasError('pattern')) {
+            <small class="field-error">La contrasena no puede contener espacios.</small>
+          }
+        </label>
+
+        <button type="submit" [disabled]="state.viewState === 'loading'" data-cy="empleado-login-submit">
+          @if (state.viewState === 'loading') { Validando... } @else { Entrar }
+        </button>
+      </form>
+    }
+
+    @if (state.viewState === 'error') {
+      <p class="feedback error" data-cy="empleado-login-error">{{ state.errorMessage }}</p>
+    }
+
+    <div class="login-secondary-actions" data-cy="empleado-login-secondary-actions">
+      <p>Si administras catalogos, usa el acceso administrativo.</p>
+      <a routerLink="/" class="employee-access-link" data-cy="go-admin-login">Ir a login admin</a>
+    </div>
+  </section>
+</main>

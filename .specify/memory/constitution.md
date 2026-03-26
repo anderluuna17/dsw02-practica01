@@ -1,8 +1,9 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 -> 1.3.0
+- Version change: 1.3.0 -> 1.4.0
 - Modified principles:
-	- V. Contrato API Versionado, Paginación y Documentación Viva -> V. Contrato API Versionado, Paginación, Perfil de Acceso y Documentación Viva
+	- II. Seguridad por Defecto (Basic Auth) -> II. Seguridad por Defecto (Basic Auth + Login de Empleado)
+	- V. Contrato API Versionado, Paginación, Perfil de Acceso y Documentación Viva -> V. Contrato API Versionado, Paginación, Identidad de Actor y Documentación Viva
 - Added sections: Ninguna (se amplía contenido en secciones existentes)
 - Removed sections: Ninguna
 - Templates requiring updates:
@@ -12,7 +13,7 @@ Sync Impact Report
 	- ✅ .specify/templates/commands/*.md (no aplica: ruta no existe en este workspace)
 - Runtime guidance updates:
 	- ✅ .github/agents/copilot-instructions.md
-	- ✅ frontend/README.md (revisado, no aplica cambio de gobernanza API)
+	- ✅ frontend/README.md
 - Deferred TODOs: Ninguno
 -->
 
@@ -23,9 +24,10 @@ Sync Impact Report
 ### I. Stack Tecnológico Obligatorio
 El backend se implementa exclusivamente con Spring Boot 3 y Java 17. No se permite introducir frameworks alternativos para el núcleo de API, seguridad o persistencia sin una enmienda explícita a esta constitución.
 
-### II. Seguridad por Defecto (Basic Auth)
+### II. Seguridad por Defecto (Basic Auth + Login de Empleado)
 Todas las rutas de negocio deben estar protegidas mediante autenticación HTTP Basic usando Spring Security. Solo podrán existir endpoints públicos cuando estén justificados (por ejemplo, health checks) y documentados de forma explícita.
 En entornos local/desarrollo, las credenciales por defecto DEBEN ser `admin` (usuario) y `admin123` (contraseña), con posibilidad de sobreescritura por variables de entorno.
+El sistema DEBE soportar además inicio de sesión del actor empleado mediante correo y contraseña de empleado, con validación explícita de credenciales y sin degradar la protección de rutas administrativas.
 
 ### III. Persistencia en PostgreSQL
 La base de datos oficial del proyecto es PostgreSQL. Toda funcionalidad persistente debe modelarse para PostgreSQL y ejecutarse mediante configuración parametrizable por variables de entorno.
@@ -33,10 +35,11 @@ La base de datos oficial del proyecto es PostgreSQL. Toda funcionalidad persiste
 ### IV. Entorno Reproducible con Docker
 El proyecto debe poder levantarse en local y en integración mediante Docker y Docker Compose, incluyendo al menos el servicio de aplicación y PostgreSQL. Ningún flujo crítico debe depender de instalaciones manuales fuera de contenedores.
 
-### V. Contrato API Versionado, Paginación, Perfil de Acceso y Documentación Viva
+### V. Contrato API Versionado, Paginación, Identidad de Actor y Documentación Viva
 Toda API REST DEBE estar versionada en ruta (`/api/v{major}/...`) y reflejar esa versión en OpenAPI.
 Todo endpoint de listado DEBE soportar paginación y DEBE usar por defecto `size=5` cuando no se especifique.
 Los endpoints de introspección de sesión/autenticación (por ejemplo, `/auth/me`) DEBEN distinguir explícitamente actor administrativo y actor empleado en el contrato, evitando representar al admin como empleado.
+Los contratos de autenticación DEBEN contemplar de forma explícita el flujo de login de empleado por correo y contraseña, incluyendo ejemplos de request/response y códigos de error esperados.
 No se aceptan endpoints nuevos o cambios de contrato sin actualización de Swagger/OpenAPI y ejemplos de uso.
 
 ## Restricciones Técnicas y de Arquitectura
@@ -51,6 +54,7 @@ No se aceptan endpoints nuevos o cambios de contrato sin actualización de Swagg
 - Versionado API: prefijo obligatorio por versión mayor en rutas públicas (`/api/v1/...`).
 - Paginación: listados públicos con parámetros de paginación (`page`, `size`) y `size=5` por defecto.
 - Perfil autenticado: los contratos de perfil de sesión DEBEN declarar tipo de actor (`ADMIN`/`EMPLEADO` o equivalente) para decisiones de autorización en frontend y backend.
+- Login de empleado: el contrato de autenticación DEBE permitir credenciales de empleado por correo+contraseña y documentar claramente su alcance de permisos.
 - Configuración: no hardcodear secretos; usar variables de entorno y/o archivos `.env` fuera de control de versiones.
 - En no-producción se permite valor por defecto de Basic Auth (`admin`/`admin123`) únicamente como baseline de arranque; en producción DEBE sobreescribirse.
 
@@ -61,6 +65,7 @@ No se aceptan endpoints nuevos o cambios de contrato sin actualización de Swagg
 	- Endpoint(s) versionados (`/api/v{major}/...`).
 	- Paginación en listados con valor por defecto `size=5`.
 	- Contrato de perfil autenticado actualizado cuando cambien reglas de acceso admin/empleado.
+	- Contrato de login de empleado por correo+contraseña actualizado cuando cambien reglas de autenticación de empleado.
 	- Seguridad aplicada con Basic Auth.
 	- Credenciales default de desarrollo configuradas (`admin`/`admin123`) o justificadas si difieren.
 	- Persistencia en PostgreSQL (si corresponde).
@@ -71,6 +76,7 @@ No se aceptan endpoints nuevos o cambios de contrato sin actualización de Swagg
 	- Pruebas unitarias e integración relevantes en verde.
 	- Validación manual mínima de endpoints en Swagger UI.
 	- Validación explícita de contrato de `/auth/me` para distinguir actor admin y empleado cuando aplique.
+	- Validación explícita del flujo de login de empleado por correo+contraseña cuando aplique.
 	- Validación de acceso con credenciales Basic Auth por defecto en entorno local.
 	- Validación explícita de versionado de ruta y comportamiento de paginación por defecto.
 - Cualquier desviación del stack definido debe registrarse como excepción técnica con motivo, alcance y plan de reversión.
@@ -93,4 +99,4 @@ Expectativa de cumplimiento:
 - Toda PR DEBE declarar cumplimiento constitucional en el `plan.md` y en revisión técnica.
 - Cualquier excepción DEBE registrarse con alcance temporal y plan de remediación.
 
-**Version**: 1.3.0 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-03-22
+**Version**: 1.4.0 | **Ratified**: 2026-02-25 | **Last Amended**: 2026-03-26

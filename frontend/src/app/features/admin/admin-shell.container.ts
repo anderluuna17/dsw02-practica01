@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthSessionService } from '../../core/auth/auth-session.service';
@@ -13,26 +14,29 @@ import { Departamento, Empleado } from '../../core/models/empleado.models';
 @Component({
   selector: 'app-admin-shell-container',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './admin-shell.container.html',
   styleUrl: './admin-shell.container.scss'
 })
 export class AdminShellContainerComponent {
   private readonly fb = inject(FormBuilder);
   private readonly http = inject(HttpClient);
+  private readonly cdr = inject(ChangeDetectorRef);
   private readonly empleadosApi = inject(EmpleadosApiService);
   private readonly authSessionService = inject(AuthSessionService);
   private readonly authCredentialPattern = /^\S+$/;
+  private readonly nombrePattern = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+  private readonly telefonoPattern = /^[0-9]+$/;
 
   protected readonly authForm = this.fb.nonNullable.group({
-    username: ['admin', [Validators.required, Validators.pattern(this.authCredentialPattern)]],
-    password: ['admin123', [Validators.required, Validators.pattern(this.authCredentialPattern)]],
+    username: ['', [Validators.required, Validators.pattern(this.authCredentialPattern)]],
+    password: ['', [Validators.required, Validators.pattern(this.authCredentialPattern)]],
   });
 
   protected readonly empleadoForm = this.fb.nonNullable.group({
-    nombre: ['', [Validators.required, Validators.maxLength(100)]],
+    nombre: ['', [Validators.required, Validators.pattern(this.nombrePattern), Validators.maxLength(100)]],
     direccion: ['', [Validators.required, Validators.maxLength(100)]],
-    telefono: ['', [Validators.required, Validators.maxLength(100)]],
+    telefono: ['', [Validators.required, Validators.pattern(this.telefonoPattern), Validators.maxLength(100)]],
     correo: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
     contrasena: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
     departamentoClave: [''],
@@ -107,16 +111,23 @@ export class AdminShellContainerComponent {
       this.perfil = perfil;
 
       this.authSessionService.setProfile(this.perfil);
-
-      await Promise.all([this.loadEmpleados(0), this.loadDepartamentos(0)]);
       this.message = `Sesion iniciada como ${this.perfil.displayName}`;
+
+      // Run initial data loading without blocking the auth transition.
+      // This avoids the UI waiting for multiple requests before rendering the shell.
+      void this.preloadWorkspaceData();
     } catch (error) {
       this.perfil = null;
       this.authSessionService.clear();
       this.errorMessage = this.formatError(error, 'No fue posible iniciar sesion.');
     } finally {
       this.loadingAuth = false;
+      this.requestRender();
     }
+  }
+
+  private async preloadWorkspaceData(): Promise<void> {
+    await Promise.all([this.loadEmpleados(0), this.loadDepartamentos(0)]);
   }
 
   protected logout(): void {
@@ -128,6 +139,7 @@ export class AdminShellContainerComponent {
     this.departamentoEditingClave = null;
     this.message = 'Sesion cerrada.';
     this.errorMessage = '';
+    this.requestRender();
   }
 
   protected async loadEmpleados(page: number): Promise<void> {
@@ -153,6 +165,7 @@ export class AdminShellContainerComponent {
       this.errorMessage = this.formatError(error, 'No fue posible cargar empleados.');
     } finally {
       this.loadingEmpleados = false;
+      this.requestRender();
     }
   }
 
@@ -179,7 +192,30 @@ export class AdminShellContainerComponent {
       this.errorMessage = this.formatError(error, 'No fue posible cargar departamentos.');
     } finally {
       this.loadingDepartamentos = false;
+      this.requestRender();
     }
+  }
+
+  protected async switchToEmpleados(): Promise<void> {
+    this.view = 'empleados';
+    this.requestRender();
+
+    if (!this.isAuthenticated) {
+      return;
+    }
+
+    await this.loadEmpleados(this.empleadosPage);
+  }
+
+  protected async switchToDepartamentos(): Promise<void> {
+    this.view = 'departamentos';
+    this.requestRender();
+
+    if (!this.isAuthenticated) {
+      return;
+    }
+
+    await this.loadDepartamentos(this.departamentosPage);
   }
 
   protected startCreateEmpleado(): void {
@@ -205,6 +241,7 @@ export class AdminShellContainerComponent {
       Validators.maxLength(72),
     ]);
     this.empleadoForm.controls.contrasena.updateValueAndValidity();
+    this.requestRender();
   }
 
   protected startEditEmpleado(empleado: Empleado): void {
@@ -227,15 +264,24 @@ export class AdminShellContainerComponent {
       Validators.maxLength(72),
     ]);
     this.empleadoForm.controls.contrasena.updateValueAndValidity();
+    this.requestRender();
   }
 
   protected cancelEmpleadoEdition(): void {
     this.startCreateEmpleado();
+    this.requestRender();
   }
 
   protected async submitEmpleado(): Promise<void> {
     if (!this.isAuthenticated || this.empleadoForm.invalid || this.savingEmpleado) {
       return;
+    }
+
+    if (this.empleadoEditingClave) {
+      const confirmed = window.confirm(`Deseas actualizar el empleado ${this.empleadoEditingClave}?`);
+      if (!confirmed) {
+        return;
+      }
     }
 
     this.resetFeedback();
@@ -292,6 +338,7 @@ export class AdminShellContainerComponent {
       this.errorMessage = this.formatError(error, 'No fue posible guardar el empleado.');
     } finally {
       this.savingEmpleado = false;
+      this.requestRender();
     }
   }
 
@@ -316,22 +363,27 @@ export class AdminShellContainerComponent {
         return;
       }
       this.errorMessage = this.formatError(error, 'No fue posible eliminar el empleado.');
+    } finally {
+      this.requestRender();
     }
   }
 
   protected startCreateDepartamento(): void {
     this.departamentoEditingClave = null;
     this.departamentoForm.reset({ nombre: '' });
+    this.requestRender();
   }
 
   protected startEditDepartamento(departamento: Departamento): void {
     this.departamentoEditingClave = departamento.clave;
     this.view = 'departamentos';
     this.departamentoForm.reset({ nombre: departamento.nombre });
+    this.requestRender();
   }
 
   protected cancelDepartamentoEdition(): void {
     this.startCreateDepartamento();
+    this.requestRender();
   }
 
   protected async submitDepartamento(): Promise<void> {
@@ -372,11 +424,17 @@ export class AdminShellContainerComponent {
       this.errorMessage = this.formatError(error, 'No fue posible guardar el departamento.');
     } finally {
       this.savingDepartamento = false;
+      this.requestRender();
     }
   }
 
   protected async deleteDepartamento(clave: string): Promise<void> {
     if (!this.isAuthenticated) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Deseas eliminar el departamento ${clave}?`);
+    if (!confirmed) {
       return;
     }
 
@@ -395,6 +453,8 @@ export class AdminShellContainerComponent {
         return;
       }
       this.errorMessage = this.formatError(error, 'No fue posible eliminar el departamento.');
+    } finally {
+      this.requestRender();
     }
   }
 
@@ -429,6 +489,11 @@ export class AdminShellContainerComponent {
     this.empleados = [];
     this.departamentos = [];
     this.errorMessage = 'Sesion invalidada por el backend. Inicia sesion nuevamente.';
+    this.requestRender();
     return true;
+  }
+
+  private requestRender(): void {
+    queueMicrotask(() => this.cdr.detectChanges());
   }
 }
