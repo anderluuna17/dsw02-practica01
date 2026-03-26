@@ -13,6 +13,12 @@ Auto-generated from all feature plans. Last updated: 2026-02-26
 - PostgreSQL (sin cambios de modelo persistente para esta feature) (006-fix-admin-auth-role)
 - Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.3.x, Spring Security (HTTP Basic), Spring Data JPA, PostgreSQL driver, Angular standalone APIs, RxJS (006-fix-admin-auth-role)
 - PostgreSQL (sin cambios de esquema obligatorios para esta feature) (006-fix-admin-auth-role)
+- TypeScript 5.9 + Angular 21 + Angular standalone APIs, RxJS, Angular HttpClient, Angular Forms (007-refactor-angular-components)
+- N/A (frontend consume API backend existente) (007-refactor-angular-components)
+- TypeScript 5.9 + Angular 21 + Angular standalone APIs, RxJS, Angular HttpClient, Angular Forms, Cypress 15 (007-refactor-angular-components)
+- N/A (frontend consume API backend existente en Spring Boot + PostgreSQL) (007-refactor-angular-components)
+- Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.x, Spring Security (HTTP Basic), Spring Data JPA, Angular standalone APIs, RxJS, Angular HttpClient, Cypress 15 (008-login-empleado-correo)
+- PostgreSQL (backend), sesion de frontend en memoria de UI (sin persistencia) (008-login-empleado-correo)
 
 - Java 17 + Spring Boot 3 (Web, Validation, Data JPA, Security), springdoc-openapi (001-crud-empleado)
 
@@ -36,6 +42,7 @@ Java 17: Follow standard conventions
 - Version public REST endpoints using path prefix `/api/v{major}/...`.
 - Implement pagination for list endpoints with default `size=5`.
 - Ensure auth profile endpoints (for example `/auth/me`) explicitly distinguish admin vs empleado actor types.
+- Ensure empleado login via correo+contrasena is supported in authentication contracts and validated in feature tests when auth is touched.
 - Keep OpenAPI documentation synchronized with endpoint version and pagination params.
 
 ## Security Defaults
@@ -45,9 +52,9 @@ Java 17: Follow standard conventions
 - Allow credentials override via environment variables.
 
 ## Recent Changes
-- 006-fix-admin-auth-role: Added Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.3.x, Spring Security (HTTP Basic), Spring Data JPA, PostgreSQL driver, Angular standalone APIs, RxJS
-- 006-fix-admin-auth-role: Added Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.3.2, Spring Security (HTTP Basic), Spring Data JPA, PostgreSQL driver, Angular standalone APIs, RxJS
-- 005-crud-empleados-frontend-admin: Added TypeScript 5.9, HTML, SCSS (Angular 21.2.x en este entorno) + Angular standalone APIs, `@angular/common/http`, `@angular/forms`, RxJS
+- 008-login-empleado-correo: Added Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.x, Spring Security (HTTP Basic), Spring Data JPA, Angular standalone APIs, RxJS, Angular HttpClient, Cypress 15
+- 007-refactor-angular-components: Added TypeScript 5.9 + Angular 21 + Angular standalone APIs, RxJS, Angular HttpClient, Angular Forms, Cypress 15
+- 007-refactor-angular-components: Added TypeScript 5.9 + Angular 21 + Angular standalone APIs, RxJS, Angular HttpClient, Angular Forms
 
 
 <!-- MANUAL ADDITIONS START -->

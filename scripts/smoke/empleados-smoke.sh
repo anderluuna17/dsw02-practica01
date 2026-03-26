@@ -31,6 +31,34 @@ if [[ "$patch_status" != "403" ]]; then
   exit 1
 fi
 
+invalid_auth_status=$(curl -sS -o /dev/null -w "%{http_code}" \
+  -u "smoke.user@empresa.com:PasswordIncorrecta" \
+  "$BASE_URL/api/v1/empleados/auth/me")
+
+if [[ "$invalid_auth_status" != "401" ]]; then
+  echo "Se esperaba 401 con password incorrecta, pero fue $invalid_auth_status"
+  exit 1
+fi
+
+curl -sS -u "$USER_NAME:$USER_PASS" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/api/v1/empleados/$clave/estado" \
+  -d '{"activo":false}' >/dev/null
+
+inactive_auth_status=$(curl -sS -o /dev/null -w "%{http_code}" \
+  -u "smoke.user@empresa.com:SmokePass123" \
+  "$BASE_URL/api/v1/empleados/auth/me")
+
+if [[ "$inactive_auth_status" != "401" ]]; then
+  echo "Se esperaba 401 para cuenta inactiva, pero fue $inactive_auth_status"
+  exit 1
+fi
+
+curl -sS -u "$USER_NAME:$USER_PASS" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/api/v1/empleados/$clave/estado" \
+  -d '{"activo":true}' >/dev/null
+
 curl -sS -u "$USER_NAME:$USER_PASS" -X DELETE "$BASE_URL/api/v1/empleados/$clave" >/dev/null
 
 echo "Smoke OK for clave $clave"
