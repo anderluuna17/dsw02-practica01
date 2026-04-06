@@ -39,6 +39,7 @@
   - List endpoints define pagination with default `size=5`
   - Basic Auth defaults for local/dev are `admin` / `admin123` (overridable by env)
   - Employee actor login by email+password is defined and validated when feature touches authentication
+  - Employee actor authorization scope is read-only for empleados/departamentos listings (no CRUD)
   - Auth profile endpoints (e.g. `/auth/me`) distinguish ADMIN vs EMPLEADO actors in contract
   - OpenAPI reflects route version and pagination parameters
 -->

@@ -40,3 +40,15 @@ export interface Departamento {
   clave: string;
   nombre: string;
 }
+
+export interface EmpleadoReadOnly {
+  id: string;
+  nombre: string;
+  correo: string;
+  departamento: string | null;
+}
+
+export interface DepartamentoReadOnly {
+  id: string;
+  nombre: string;
+}

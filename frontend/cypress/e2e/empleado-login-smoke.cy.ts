@@ -18,6 +18,8 @@ describe('Empleado login smoke', () => {
     });
 
     cy.intercept('GET', '**/api/v1/empleados/auth/me').as('authMe');
+    cy.intercept('GET', '**/api/v1/empleados?page=*&size=*').as('listEmpleados');
+    cy.intercept('GET', '**/api/v1/departamentos?page=*&size=*').as('listDepartamentos');
 
     cy.visit('/empleado/login');
 
@@ -31,13 +33,20 @@ describe('Empleado login smoke', () => {
       expect(interception.response?.body?.permissions).to.deep.equal(['SELF']);
     });
 
-    cy.window().then((win: any) => {
-      const empleadoLoginRoot = win.document.querySelector('app-empleado-login-container');
-      const component = win.ng.getComponent(empleadoLoginRoot);
-      win.ng.applyChanges(component);
+    cy.wait('@listEmpleados').then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200);
+      expect(interception.response?.body?.content).to.be.an('array');
+    });
+
+    cy.wait('@listDepartamentos').then((interception) => {
+      expect(interception.response?.statusCode).to.eq(200);
+      expect(interception.response?.body?.content).to.be.an('array');
     });
 
     cy.get('[data-cy="empleado-login-success"]').should('be.visible');
+    cy.get('[data-cy="empleado-readonly-note"]').should('be.visible');
+    cy.get('[data-cy="empleado-readonly-empleados"]').should('be.visible');
+    cy.get('[data-cy="empleado-readonly-departamentos"]').should('be.visible');
 
     cy.window().then((win) => {
       expect(win.localStorage.length).to.eq(0);

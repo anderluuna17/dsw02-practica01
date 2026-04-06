@@ -58,6 +58,8 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 
 - Admin access in local/dev uses `admin` / `admin123` by default (if backend env keeps defaults).
 - Empleado access must authenticate with empleado email and password.
+- After empleado login, UI must show empleados and departamentos listings in read-only mode.
+- Empleado role must not be able to trigger create, update, or delete actions for empleados/departamentos.
 - Any authentication contract change must be reflected in OpenAPI and in smoke/regression tests.
 
 ## Additional Resources
