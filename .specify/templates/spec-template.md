@@ -102,6 +102,7 @@
 - **FR-API-AUTH-DEF**: Local/dev Basic Auth defaults MUST be `admin` (user) and `admin123` (password), with env override support.
 - **FR-API-AUTH-PROFILE**: Auth profile endpoints (e.g., `/auth/me`) MUST declare actor type (ADMIN/EMPLEADO or equivalent) and MUST NOT represent admin as empleado.
 - **FR-API-EMP-LOGIN**: Employee actor authentication MUST support login with employee email and password, and the contract MUST document success and failure responses.
+- **FR-API-EMP-READONLY**: After empleado login, the system MUST allow viewing empleados and departamentos listings in read-only mode, and MUST deny create/update/delete operations for empleado actor.
 
 ### Key Entities *(include if feature involves data)*
 

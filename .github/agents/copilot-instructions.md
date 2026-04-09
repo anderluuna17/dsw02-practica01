@@ -19,6 +19,8 @@ Auto-generated from all feature plans. Last updated: 2026-02-26
 - N/A (frontend consume API backend existente en Spring Boot + PostgreSQL) (007-refactor-angular-components)
 - Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.x, Spring Security (HTTP Basic), Spring Data JPA, Angular standalone APIs, RxJS, Angular HttpClient, Cypress 15 (008-login-empleado-correo)
 - PostgreSQL (backend), sesion de frontend en memoria de UI (sin persistencia) (008-login-empleado-correo)
+- Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.x, Spring Security (HTTP Basic), Spring Data JPA, springdoc-openapi, Angular standalone APIs, Angular HttpClient, RxJS, Cypress 15 (009-empleado-readonly-listados)
+- PostgreSQL (sin nuevos cambios de esquema obligatorios para esta feature) (009-empleado-readonly-listados)
 
 - Java 17 + Spring Boot 3 (Web, Validation, Data JPA, Security), springdoc-openapi (001-crud-empleado)
 
@@ -43,6 +45,7 @@ Java 17: Follow standard conventions
 - Implement pagination for list endpoints with default `size=5`.
 - Ensure auth profile endpoints (for example `/auth/me`) explicitly distinguish admin vs empleado actor types.
 - Ensure empleado login via correo+contrasena is supported in authentication contracts and validated in feature tests when auth is touched.
+- Enforce actor scope so empleado can only view empleados/departamentos listings and cannot perform CRUD operations.
 - Keep OpenAPI documentation synchronized with endpoint version and pagination params.
 
 ## Security Defaults
@@ -50,11 +53,12 @@ Java 17: Follow standard conventions
 - Use HTTP Basic Auth for business endpoints.
 - For local/dev defaults, use `APP_BASIC_USER=admin` and `APP_BASIC_PASSWORD=admin123`.
 - Allow credentials override via environment variables.
+- Validate authorization behavior by actor: empleado read access only, no write permissions on empleados/departamentos.
 
 ## Recent Changes
+- 009-empleado-readonly-listados: Added Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.x, Spring Security (HTTP Basic), Spring Data JPA, springdoc-openapi, Angular standalone APIs, Angular HttpClient, RxJS, Cypress 15
 - 008-login-empleado-correo: Added Java 17 (backend), TypeScript 5.9 (frontend Angular 21) + Spring Boot 3.x, Spring Security (HTTP Basic), Spring Data JPA, Angular standalone APIs, RxJS, Angular HttpClient, Cypress 15
 - 007-refactor-angular-components: Added TypeScript 5.9 + Angular 21 + Angular standalone APIs, RxJS, Angular HttpClient, Angular Forms, Cypress 15
-- 007-refactor-angular-components: Added TypeScript 5.9 + Angular 21 + Angular standalone APIs, RxJS, Angular HttpClient, Angular Forms
 
 
 <!-- MANUAL ADDITIONS START -->

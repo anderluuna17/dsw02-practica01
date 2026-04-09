@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { AuthSessionService } from './auth-session.service';
 import { EmpleadosApiService } from '../http/empleados-api.service';
 import { PerfilAuth } from '../models/auth.models';
+import { ApiPage, DepartamentoReadOnly, EmpleadoReadOnly } from '../models/empleado.models';
 
 @Injectable({
   providedIn: 'root',
@@ -36,5 +37,17 @@ export class EmpleadoAuthFacade {
 
   logout(): void {
     this.authSessionService.clear();
+  }
+
+  async listEmpleadosReadOnly(page: number, size: number): Promise<ApiPage<EmpleadoReadOnly>> {
+    return firstValueFrom(this.empleadosApiService.listEmpleadosReadOnly(page, size, this.authHeaders()));
+  }
+
+  async listDepartamentosReadOnly(page: number, size: number): Promise<ApiPage<DepartamentoReadOnly>> {
+    return firstValueFrom(this.empleadosApiService.listDepartamentosReadOnly(page, size, this.authHeaders()));
+  }
+
+  private authHeaders() {
+    return this.authSessionService.getAuthHeaders();
   }
 }
