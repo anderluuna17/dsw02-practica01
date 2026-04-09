@@ -5,7 +5,6 @@ import com.dsw02.empleado.api.dto.EmpleadoAuthProfileResponse;
 import com.dsw02.empleado.api.dto.EmpleadoEstadoRequest;
 import com.dsw02.empleado.api.dto.EmpleadoEstadoResponse;
 import com.dsw02.empleado.api.dto.EmpleadoDepartamentoRequest;
-import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
 import com.dsw02.empleado.api.dto.EmpleadoResponse;
 import com.dsw02.empleado.api.dto.EmpleadoUpdateRequest;
 import com.dsw02.empleado.application.ActualizarEmpleadoService;
@@ -82,11 +81,16 @@ public class EmpleadoController {
 
     @GetMapping
     @Operation(summary = "Listar empleados")
-    public EmpleadoPageResponse listar(
+    public Object listar(
+        Principal principal,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
-        return listarEmpleadosService.listar(page, size);
+        if (adminBasicUser.equals(principal.getName())) {
+            return listarEmpleadosService.listar(page, size);
+        }
+
+        return listarEmpleadosService.listarReadOnly(page, size);
     }
 
     @GetMapping("/auth/me")

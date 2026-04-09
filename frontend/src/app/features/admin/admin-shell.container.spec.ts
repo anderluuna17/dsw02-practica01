@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { AdminShellContainerComponent } from './admin-shell.container';
 
@@ -6,6 +7,7 @@ describe('AdminShellContainerComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AdminShellContainerComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
@@ -21,7 +23,7 @@ describe('AdminShellContainerComponent', () => {
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h2')?.textContent).toContain('Iniciar sesion');
+    expect(compiled.querySelector('h2')?.textContent).toContain('Iniciar sesión');
   });
 
   it('should block login when credentials are blank', async () => {

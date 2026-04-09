@@ -1,7 +1,6 @@
 package com.dsw02.empleado.api;
 
 import com.dsw02.empleado.api.dto.DepartamentoCreateRequest;
-import com.dsw02.empleado.api.dto.DepartamentoPageResponse;
 import com.dsw02.empleado.api.dto.DepartamentoResponse;
 import com.dsw02.empleado.api.dto.DepartamentoUpdateRequest;
 import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
@@ -14,6 +13,8 @@ import com.dsw02.empleado.application.ObtenerDepartamentoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.security.Principal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,6 +38,7 @@ public class DepartamentoController {
     private final ActualizarDepartamentoService actualizarDepartamentoService;
     private final EliminarDepartamentoService eliminarDepartamentoService;
     private final ListarEmpleadosPorDepartamentoService listarEmpleadosPorDepartamentoService;
+    private final String adminBasicUser;
 
     public DepartamentoController(
         CrearDepartamentoService crearDepartamentoService,
@@ -44,7 +46,8 @@ public class DepartamentoController {
         ObtenerDepartamentoService obtenerDepartamentoService,
         ActualizarDepartamentoService actualizarDepartamentoService,
         EliminarDepartamentoService eliminarDepartamentoService,
-        ListarEmpleadosPorDepartamentoService listarEmpleadosPorDepartamentoService
+        ListarEmpleadosPorDepartamentoService listarEmpleadosPorDepartamentoService,
+        @Value("${APP_BASIC_USER:admin}") String adminBasicUser
     ) {
         this.crearDepartamentoService = crearDepartamentoService;
         this.listarDepartamentosService = listarDepartamentosService;
@@ -52,6 +55,7 @@ public class DepartamentoController {
         this.actualizarDepartamentoService = actualizarDepartamentoService;
         this.eliminarDepartamentoService = eliminarDepartamentoService;
         this.listarEmpleadosPorDepartamentoService = listarEmpleadosPorDepartamentoService;
+        this.adminBasicUser = adminBasicUser;
     }
 
     @PostMapping
@@ -63,11 +67,16 @@ public class DepartamentoController {
 
     @GetMapping
     @Operation(summary = "Listar departamentos")
-    public DepartamentoPageResponse listar(
+    public Object listar(
+        Principal principal,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
-        return listarDepartamentosService.listar(page, size);
+        if (adminBasicUser.equals(principal.getName())) {
+            return listarDepartamentosService.listar(page, size);
+        }
+
+        return listarDepartamentosService.listarReadOnly(page, size);
     }
 
     @GetMapping("/{clave}")
