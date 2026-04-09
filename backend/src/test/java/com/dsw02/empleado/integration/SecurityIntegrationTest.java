@@ -70,8 +70,9 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
 
         mockMvc.perform(get("/api/v1/empleados")
                 .with(httpBasic("demo@empresa.com", "MiPassword123")))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").exists())
+            .andExpect(jsonPath("$.content[0].correo").exists());
     }
 
     @Test
@@ -127,7 +128,7 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
     }
 
     @Test
-    void shouldDenyAdminListingsForEmpleadoActor() throws Exception {
+    void shouldAllowReadOnlyListingsAndDenyWritesForEmpleadoActor() throws Exception {
         String createPayload = """
             {
               "nombre":"Empleado Denegado",
@@ -146,11 +147,21 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
 
         mockMvc.perform(get("/api/v1/empleados")
                 .with(httpBasic("empleado.denegado@empresa.com", "MiPassword123")))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].id").exists());
 
         mockMvc.perform(get("/api/v1/departamentos")
                 .with(httpBasic("empleado.denegado@empresa.com", "MiPassword123")))
+            .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/v1/departamentos")
+                .with(httpBasic("empleado.denegado@empresa.com", "MiPassword123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                      "nombre":"Depto no permitido"
+                    }
+                    """))
             .andExpect(status().isForbidden())
             .andExpect(jsonPath("$.code").value("NO_AUTORIZADO"));
     }

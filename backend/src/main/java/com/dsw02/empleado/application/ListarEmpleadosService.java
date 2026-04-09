@@ -1,6 +1,8 @@
 package com.dsw02.empleado.application;
 
 import com.dsw02.empleado.api.dto.EmpleadoPageResponse;
+import com.dsw02.empleado.api.dto.EmpleadoReadOnlyPageResponse;
+import com.dsw02.empleado.api.dto.EmpleadoReadOnlyResponse;
 import com.dsw02.empleado.api.dto.EmpleadoResponse;
 import com.dsw02.empleado.domain.ClaveParser;
 import com.dsw02.empleado.infrastructure.persistence.EmpleadoEntity;
@@ -31,12 +33,32 @@ public class ListarEmpleadosService {
         );
     }
 
+    public EmpleadoReadOnlyPageResponse listarReadOnly(int page, int size) {
+        Page<EmpleadoEntity> result = empleadoRepository.findAll(PageRequest.of(page, size));
+        return new EmpleadoReadOnlyPageResponse(
+            result.getContent().stream().map(this::toReadOnlyResponse).toList(),
+            result.getNumber(),
+            result.getSize(),
+            result.getTotalElements(),
+            result.getTotalPages()
+        );
+    }
+
     private EmpleadoResponse toResponse(EmpleadoEntity entity) {
         return new EmpleadoResponse(
             claveParser.buildClave(entity.getId().getConsecutivo()),
             entity.getNombre(),
             entity.getDireccion(),
             entity.getTelefono(),
+            entity.getDepartamentoClave()
+        );
+    }
+
+    private EmpleadoReadOnlyResponse toReadOnlyResponse(EmpleadoEntity entity) {
+        return new EmpleadoReadOnlyResponse(
+            claveParser.buildClave(entity.getId().getConsecutivo()),
+            entity.getNombre(),
+            entity.getCorreo(),
             entity.getDepartamentoClave()
         );
     }

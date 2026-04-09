@@ -5,7 +5,9 @@ import { Observable } from 'rxjs';
 import {
   ApiPage,
   Departamento,
+  DepartamentoReadOnly,
   Empleado,
+  EmpleadoReadOnly,
   EmpleadoCreateRequest,
   EmpleadoDepartamentoPatchRequest,
   EmpleadoUpdateRequest,
@@ -54,6 +56,30 @@ export class EmpleadosApiService {
 
   listDepartamentos(page: number, size: number, headers: HttpHeaders): Observable<ApiPage<Departamento>> {
     return this.http.get<ApiPage<Departamento>>('/api/v1/departamentos', {
+      headers,
+      params: {
+        page: String(page),
+        size: String(size),
+      },
+    });
+  }
+
+  listEmpleadosReadOnly(page: number, size: number, headers: HttpHeaders): Observable<ApiPage<EmpleadoReadOnly>> {
+    return this.http.get<ApiPage<EmpleadoReadOnly>>('/api/v1/empleados', {
+      headers,
+      params: {
+        page: String(page),
+        size: String(size),
+      },
+    });
+  }
+
+  listDepartamentosReadOnly(
+    page: number,
+    size: number,
+    headers: HttpHeaders
+  ): Observable<ApiPage<DepartamentoReadOnly>> {
+    return this.http.get<ApiPage<DepartamentoReadOnly>>('/api/v1/departamentos', {
       headers,
       params: {
         page: String(page),

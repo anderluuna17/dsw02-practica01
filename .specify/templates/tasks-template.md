@@ -67,6 +67,7 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T005a [P] Configure local/dev Basic Auth defaults (`admin` / `admin123`) with env override
 - [ ] T005b [P] Define auth profile contract for admin vs empleado actors (e.g., `/auth/me`)
 - [ ] T005c [P] Define and validate empleado login contract using email + password
+- [ ] T005d [P] Enforce and test empleado actor read-only permissions for empleados/departamentos listings (deny CRUD)
 - [ ] T006 [P] Setup API routing and middleware structure
 - [ ] T006a [P] Enforce API route versioning strategy (e.g., `/api/v1/...`)
 - [ ] T006b [P] Define pagination defaults for list endpoints (`size=5`)

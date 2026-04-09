@@ -90,6 +90,10 @@ h1 {
   box-shadow: var(--shadow);
 }
 
+.login-card.with-listados {
+  max-width: 1100px;
+}
+
 .login-card h2 {
   margin: 0;
 }
@@ -180,6 +184,81 @@ button:disabled {
   gap: 0.3rem;
 }
 
+.readonly-note {
+  margin-top: 1rem;
+  color: #dce6ff;
+  background: #1f2a3d;
+  border: 1px solid #2f4262;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.readonly-section {
+  margin-top: 1rem;
+  padding: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #14161a;
+}
+
+.readonly-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-top: 1rem;
+}
+
+.readonly-grid .readonly-section {
+  margin-top: 0;
+  min-height: 100%;
+}
+
+.readonly-section h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+}
+
+.readonly-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.readonly-list li {
+  display: grid;
+  gap: 0.15rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  background: #1b1d21;
+}
+
+.readonly-list span {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.pager {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.pager span {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
 .login-secondary-actions {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -213,4 +292,10 @@ button:disabled {
   background: #1e4a6c;
   box-shadow: 0 8px 14px #0000002e;
   transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+  .readonly-grid {
+    grid-template-columns: 1fr;
+  }
 }
