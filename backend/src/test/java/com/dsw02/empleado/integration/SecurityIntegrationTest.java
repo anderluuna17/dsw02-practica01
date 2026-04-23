@@ -153,11 +153,15 @@ class SecurityIntegrationTest extends PostgresIntegrationBase {
             }
             """;
 
-        mockMvc.perform(post("/api/v1/empleados")
+        MvcResult createResult = mockMvc.perform(post("/api/v1/empleados")
                 .with(httpBasic("admin", "admin123"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(createPayload))
-            .andExpect(status().isCreated());
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        JsonNode created = objectMapper.readTree(createResult.getResponse().getContentAsString());
+        String empleadoClave = created.get("clave").asText();
 
         mockMvc.perform(get("/api/v1/empleados")
                 .with(httpBasic("empleado.denegado@empresa.com", "MiPassword123")))
