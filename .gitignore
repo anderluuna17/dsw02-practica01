@@ -36,3 +36,6 @@ __pycache__/
 
 # Maven wrapper artifacts (optional)
 .mvn/wrapper/maven-wrapper.jar
+
+#Branch 
+echo ".claude/" >> .gitignore
