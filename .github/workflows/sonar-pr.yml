@@ -42,7 +42,7 @@ jobs:
       - name: Frontend tests + coverage
         env:
           CI: true
-        run: npm --prefix frontend run test -- --watch=false --code-coverage
+        run: npm --prefix frontend run test -- --watch=false --coverage
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
