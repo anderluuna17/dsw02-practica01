@@ -34,7 +34,7 @@ jobs:
 
       - name: Backend tests + coverage
         working-directory: backend
-        run: ./mvnw -B clean verify jacoco:report
+        run: ./mvnw -B clean verify
 
       - name: Frontend install
         run: npm --prefix frontend ci
