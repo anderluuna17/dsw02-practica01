@@ -28,6 +28,15 @@ INSERT INTO departamento (prefijo, consecutivo, clave, nombre)
 VALUES ('DEP-', 0, 'DEP-0000', 'Sin asignar')
 ON CONFLICT (prefijo, consecutivo) DO NOTHING;
 
+CREATE TABLE IF NOT EXISTS empleado (
+	prefijo VARCHAR(4) NOT NULL,
+	consecutivo BIGINT NOT NULL,
+	nombre VARCHAR(100) NOT NULL,
+	direccion VARCHAR(100) NOT NULL,
+	telefono VARCHAR(100) NOT NULL,
+	PRIMARY KEY (prefijo, consecutivo)
+);
+
 ALTER TABLE IF EXISTS empleado
 	ADD COLUMN IF NOT EXISTS correo VARCHAR(150),
 	ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255),

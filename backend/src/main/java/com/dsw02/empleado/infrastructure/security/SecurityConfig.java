@@ -64,7 +64,11 @@ public class SecurityConfig {
                     writeError(response, HttpServletResponse.SC_FORBIDDEN, ErrorCode.NO_AUTORIZADO.name(), "No autorizado")
                 )
             )
-            .httpBasic(Customizer.withDefaults())
+            .httpBasic(httpBasic -> httpBasic
+                .authenticationEntryPoint((request, response, authException) ->
+                    writeError(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorCode.AUTH_INVALIDA.name(), "Credenciales invalidas")
+                )
+            )
             .build();
     }
 
