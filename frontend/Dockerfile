@@ -1,11 +1,11 @@
-FROM node:22-alpine AS build
+FROM node:20-alpine AS build
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY . .
-RUN npm run build
+RUN npx ng build
 
 FROM nginx:1.27-alpine AS runtime
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf

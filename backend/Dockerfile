@@ -1,7 +1,7 @@
 FROM maven:3.9.9-eclipse-temurin-17 AS builder
 WORKDIR /app
-COPY pom.xml /app/pom.xml
-COPY src /app/src
+COPY backend/pom.xml /app/pom.xml
+COPY backend/src /app/src
 RUN mvn -q -DskipTests package
 
 FROM eclipse-temurin:17-jre
