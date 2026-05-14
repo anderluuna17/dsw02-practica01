@@ -1,12 +1,14 @@
 name: SonarCloud PR
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["ci"]
+    types: [completed]
 
 jobs:
   sonarqube:
     name: SonarCloud Scan
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
