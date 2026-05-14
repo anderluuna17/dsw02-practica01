@@ -1,0 +1,51 @@
+name: Cypress E2E
+
+on:
+  workflow_run:
+    workflows: ["SonarCloud PR"]
+    types: [completed]
+
+jobs:
+  cypress:
+    name: Run Cypress E2E
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js (LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm --prefix frontend ci
+
+      - name: Build frontend
+        run: npm --prefix frontend run build
+
+      - name: Start stack for Cypress tests
+        run: docker compose up -d
+
+      - name: Wait for proxy
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Proxy did not become ready in time"
+          docker compose ps
+          exit 1
+
+      - name: Run Cypress smoke tests
+        run: npm --prefix frontend run e2e -- --spec cypress/e2e/empleado-login-smoke.cy.ts --browser electron --headless --config baseUrl=http://localhost
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
